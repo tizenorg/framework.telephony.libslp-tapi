@@ -39,6 +39,7 @@ rm -rf %{buildroot}
 
 rm -rf %{buildroot}/usr/include/telephony/tapi/.gitignore
 mkdir -p %{buildroot}/usr/share/license
+cp LICENSE %{buildroot}/usr/share/license/%{name}
 
 %post -p /sbin/ldconfig
 
@@ -49,7 +50,7 @@ mkdir -p %{buildroot}/usr/share/license
 %manifest libslp-tapi.manifest
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
-/usr/share/license/libslp-tapi
+/usr/share/license/%{name}
 
 %files devel
 %defattr(-,root,root,-)

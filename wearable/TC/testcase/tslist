@@ -1,0 +1,10 @@
+/testcase/utc_common
+/testcase/utc_network
+/testcase/utc_call
+/testcase/utc_ss
+/testcase/utc_sim
+/testcase/utc_sat
+/testcase/utc_sms
+/testcase/utc_sap
+/testcase/utc_modem
+/testcase/utc_gps

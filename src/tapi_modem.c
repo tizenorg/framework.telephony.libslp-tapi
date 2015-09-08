@@ -1,7 +1,7 @@
 /*
  * libslp-tapi
  *
- * Copyright (c) 2011 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Contact: Ja-young Gu <jygu@samsung.com>
  *
@@ -28,7 +28,6 @@
 #include "TelMisc.h"
 #include "TelPower.h"
 #include "ITapiModem.h"
-#include "ITapiPS.h"
 
 #include "common.h"
 #include "tapi_log.h"
@@ -44,6 +43,7 @@ static void on_response_default_set(GObject *source_object, GAsyncResult *res, g
 
 	conn = G_DBUS_CONNECTION (source_object);
 	dbus_result = g_dbus_connection_call_finish(conn, res, &error);
+	CHECK_ERROR(error);
 
 	g_variant_get (dbus_result, "(i)", &result);
 
@@ -51,7 +51,8 @@ static void on_response_default_set(GObject *source_object, GAsyncResult *res, g
 		evt_cb_data->cb_fn(evt_cb_data->handle, result, NULL, evt_cb_data->user_data);
 	}
 
-	free(evt_cb_data);
+	g_free(evt_cb_data);
+	g_variant_unref(dbus_result);
 }
 
 static void on_response_get_version(GObject *source_object, GAsyncResult *res, gpointer user_data)
@@ -69,6 +70,7 @@ static void on_response_get_version(GObject *source_object, GAsyncResult *res, g
 
 	conn = G_DBUS_CONNECTION (source_object);
 	dbus_result = g_dbus_connection_call_finish(conn, res, &error);
+	CHECK_ERROR(error);
 
 	g_variant_get (dbus_result, "(issss)", &result,
 			&sw, &hw, &rf, &product);
@@ -80,11 +82,19 @@ static void on_response_get_version(GObject *source_object, GAsyncResult *res, g
 	g_strlcpy((gchar *)data.szRfCalDate, rf, MAX_VERSION_LEN);
 	g_strlcpy((gchar *)data.szProductCode, product, TAPI_MISC_PRODUCT_CODE_LEN_MAX);
 
-	if (evt_cb_data->cb_fn) {
-		evt_cb_data->cb_fn(evt_cb_data->handle, result, &data, evt_cb_data->user_data);
-	}
+	g_free(sw);
+	g_free(hw);
+	g_free(rf);
+	g_free(product);
 
-	free(evt_cb_data);
+	if (evt_cb_data->cb_fn) {
+		if (result != 0)
+			evt_cb_data->cb_fn(evt_cb_data->handle, result, NULL, evt_cb_data->user_data);
+		else
+			evt_cb_data->cb_fn(evt_cb_data->handle, result, &data, evt_cb_data->user_data);
+	}
+	g_free(evt_cb_data);
+	g_variant_unref(dbus_result);
 }
 
 static void on_response_get_serial_number(GObject *source_object, GAsyncResult *res, gpointer user_data)
@@ -93,20 +103,38 @@ static void on_response_get_serial_number(GObject *source_object, GAsyncResult *
 	GDBusConnection *conn = NULL;
 	struct tapi_resp_data *evt_cb_data = user_data;
 	int result = -1;
-	char *sn = NULL;
+	TelMiscSNInformation data;
+	char *sn = NULL, *meid = NULL, *imei = NULL, *imeisv = NULL;
 
 	GVariant *dbus_result;
 
 	conn = G_DBUS_CONNECTION (source_object);
 	dbus_result = g_dbus_connection_call_finish(conn, res, &error);
+	CHECK_ERROR(error);
 
-	g_variant_get (dbus_result, "(is)", &result, &sn);
+	g_variant_get (dbus_result, "(issss)", &result,
+			&sn, &meid, &imei, &imeisv);
+
+	g_strlcpy((gchar *)data.szEsn, sn, TAPI_MISC_ME_SN_LEN_MAX);
+	g_strlcpy((gchar *)data.szMeid, meid, TAPI_MISC_ME_SN_LEN_MAX);
+	g_strlcpy((gchar *)data.szImei, imei, TAPI_MISC_ME_SN_LEN_MAX);
+	g_strlcpy((gchar *)data.szImeiSv, imeisv, TAPI_MISC_ME_SN_LEN_MAX);
+
+
+	g_free(sn);
+	g_free(meid);
+	g_free(imei);
+	g_free(imeisv);
 
 	if (evt_cb_data->cb_fn) {
-		evt_cb_data->cb_fn(evt_cb_data->handle, result, sn, evt_cb_data->user_data);
+		if (result != 0)
+			evt_cb_data->cb_fn(evt_cb_data->handle, result, NULL, evt_cb_data->user_data);
+		else
+			evt_cb_data->cb_fn(evt_cb_data->handle, result, &data, evt_cb_data->user_data);
 	}
 
-	free(evt_cb_data);
+	g_free(evt_cb_data);
+	g_variant_unref(dbus_result);
 }
 
 static void on_response_get_imei(GObject *source_object, GAsyncResult *res, gpointer user_data)
@@ -121,36 +149,44 @@ static void on_response_get_imei(GObject *source_object, GAsyncResult *res, gpoi
 
 	conn = G_DBUS_CONNECTION (source_object);
 	dbus_result = g_dbus_connection_call_finish(conn, res, &error);
+	CHECK_ERROR(error);
 
 	g_variant_get (dbus_result, "(is)", &result, &imei);
 
 	if (evt_cb_data->cb_fn) {
-		evt_cb_data->cb_fn(evt_cb_data->handle, result, imei, evt_cb_data->user_data);
+		if (result != 0)
+			evt_cb_data->cb_fn(evt_cb_data->handle, result, NULL, evt_cb_data->user_data);
+		else
+			evt_cb_data->cb_fn(evt_cb_data->handle, result, imei, evt_cb_data->user_data);
 	}
+	g_free(imei);
 
-	free(evt_cb_data);
+	g_free(evt_cb_data);
+	g_variant_unref(dbus_result);
 }
 
-static void on_response_set_dun_pin_ctrl(GObject *source_object, GAsyncResult *res, gpointer user_data)
+static void on_response_get_flight_mode(GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
 	GError *error = NULL;
 	GDBusConnection *conn = NULL;
 	struct tapi_resp_data *evt_cb_data = user_data;
 	int result = -1;
+	gboolean mode = FALSE;
 
 	GVariant *dbus_result;
 
 	conn = G_DBUS_CONNECTION (source_object);
 	dbus_result = g_dbus_connection_call_finish(conn, res, &error);
+	CHECK_ERROR(error);
 
-	g_variant_get (dbus_result, "(i)", &result);
-	dbg("dun pin ctrl result(%d)", result);
+	g_variant_get (dbus_result, "(bi)", &mode, &result);
 
 	if (evt_cb_data->cb_fn) {
-		evt_cb_data->cb_fn(evt_cb_data->handle, result, 0, evt_cb_data->user_data);
+		evt_cb_data->cb_fn(evt_cb_data->handle, result, &mode, evt_cb_data->user_data);
 	}
 
-	free(evt_cb_data);
+	g_free(evt_cb_data);
+	g_variant_unref(dbus_result);
 }
 
 /**
@@ -169,11 +205,12 @@ EXPORT_API int tel_process_power_command(TapiHandle *handle, tapi_power_phone_cm
 	struct tapi_resp_data *evt_cb_data = NULL;
 	GVariant *param;
 
-	dbg("Func Entrance");
+	TAPI_RET_ERR_NUM_IF_FAIL(handle, TAPI_API_INVALID_PTR);
 
-	if (cmd > TAPI_PHONE_POWER_RESET)
+	msg("[%s] tel_process_power_command:[%d] (0:ON,1:OFF,2:RST,3:LOW)", handle->cp_name, cmd);
+
+	if (cmd > TAPI_PHONE_POWER_MAX)
 		return TAPI_API_INVALID_INPUT;
-
 	MAKE_RESP_CB_DATA(evt_cb_data, handle, callback, user_data);
 
 	param = g_variant_new("(i)", cmd);
@@ -181,7 +218,7 @@ EXPORT_API int tel_process_power_command(TapiHandle *handle, tapi_power_phone_cm
 	g_dbus_connection_call(handle->dbus_connection,
 			DBUS_TELEPHONY_SERVICE , handle->path, DBUS_TELEPHONY_MODEM_INTERFACE,
 			"SetPower", param, NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL,
+			G_DBUS_CALL_FLAGS_NONE, TAPI_DEFAULT_TIMEOUT, handle->ca,
 			on_response_default_set, evt_cb_data);
 
 	return TAPI_API_SUCCESS;
@@ -204,7 +241,9 @@ EXPORT_API int tel_set_flight_mode(TapiHandle *handle, tapi_power_flight_mode_ty
 	GVariant *param;
 	gboolean b_mode;
 
-	dbg("Func Entrance");
+	TAPI_RET_ERR_NUM_IF_FAIL(handle, TAPI_API_INVALID_PTR);
+
+	msg("[%s] requested flight mode:[%d] (1:enter, 2:leave)", handle->cp_name, mode);
 
 	if (mode == TAPI_POWER_FLIGHT_MODE_ENTER) {
 		b_mode = TRUE;
@@ -223,8 +262,28 @@ EXPORT_API int tel_set_flight_mode(TapiHandle *handle, tapi_power_flight_mode_ty
 	g_dbus_connection_call(handle->dbus_connection,
 			DBUS_TELEPHONY_SERVICE , handle->path, DBUS_TELEPHONY_MODEM_INTERFACE,
 			"SetFlightMode", param, NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL,
+			G_DBUS_CALL_FLAGS_NONE, 180000, handle->ca,
 			on_response_default_set, evt_cb_data);
+
+	return TAPI_API_SUCCESS;
+}
+
+EXPORT_API int tel_get_flight_mode(TapiHandle *handle, tapi_response_cb callback, void *user_data)
+{
+	struct tapi_resp_data *evt_cb_data = NULL;
+
+	dbg("Func Entrance");
+
+	TAPI_RET_ERR_NUM_IF_FAIL(handle, TAPI_API_INVALID_PTR);
+	TAPI_RET_ERR_NUM_IF_FAIL(callback, TAPI_API_INVALID_PTR);
+
+	MAKE_RESP_CB_DATA(evt_cb_data, handle, callback, user_data);
+
+	g_dbus_connection_call(handle->dbus_connection,
+			DBUS_TELEPHONY_SERVICE , handle->path, DBUS_TELEPHONY_MODEM_INTERFACE,
+			"GetFlightMode", NULL, NULL,
+			G_DBUS_CALL_FLAGS_NONE, TAPI_DEFAULT_TIMEOUT, handle->ca,
+			on_response_get_flight_mode, evt_cb_data);
 
 	return TAPI_API_SUCCESS;
 }
@@ -235,12 +294,15 @@ EXPORT_API int tel_get_misc_me_version(TapiHandle *handle, tapi_response_cb call
 
 	dbg("Func Entrance");
 
+	TAPI_RET_ERR_NUM_IF_FAIL(handle, TAPI_API_INVALID_PTR);
+	TAPI_RET_ERR_NUM_IF_FAIL(callback, TAPI_API_INVALID_PTR);
+
 	MAKE_RESP_CB_DATA(evt_cb_data, handle, callback, user_data);
 
 	g_dbus_connection_call(handle->dbus_connection,
 			DBUS_TELEPHONY_SERVICE , handle->path, DBUS_TELEPHONY_MODEM_INTERFACE,
 			"GetVersion", NULL, NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL,
+			G_DBUS_CALL_FLAGS_NONE, TAPI_DEFAULT_TIMEOUT, handle->ca,
 			on_response_get_version, evt_cb_data);
 
 	return TAPI_API_SUCCESS;
@@ -249,33 +311,50 @@ EXPORT_API int tel_get_misc_me_version(TapiHandle *handle, tapi_response_cb call
 EXPORT_API TelMiscVersionInformation *tel_get_misc_me_version_sync(TapiHandle *handle)
 {
 	GVariant *dbus_result;
+	GError *error = NULL;
 	int result = -1;
 	TelMiscVersionInformation *data = NULL;
 	char *sw = NULL, *hw = NULL, *rf = NULL, *product = NULL;
 
 	dbg("Func Entrance");
 
-	if (!handle)
-		return NULL;
+	TAPI_RET_ERR_NUM_IF_FAIL(handle, NULL);
 
 	dbus_result = g_dbus_connection_call_sync(handle->dbus_connection,
 			DBUS_TELEPHONY_SERVICE , handle->path, DBUS_TELEPHONY_MODEM_INTERFACE,
 			"GetVersion", NULL, NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL);
+			G_DBUS_CALL_FLAGS_NONE, TAPI_SHORT_TIMEOUT, handle->ca, &error);
+
+	if (error) {
+		warn("dbus error = %d (%s)", error->code, error->message);
+		g_error_free(error);
+	}
+
+	if (!dbus_result)
+		return NULL;
 
 	g_variant_get (dbus_result, "(issss)", &result,
 			&sw, &hw, &rf, &product);
+	g_variant_unref(dbus_result);
+
+	if (result != 0)
+		goto OUT;
 
 	dbg("product code[%s]", product);
 
-	data = calloc(sizeof(TelMiscVersionInformation), 1);
+	data = calloc(1, sizeof(TelMiscVersionInformation));
 	if (!data)
-		return NULL;
+		goto OUT;
 
 	g_strlcpy((gchar *)data->szSwVersion, sw, MAX_VERSION_LEN);
 	g_strlcpy((gchar *)data->szHwVersion, hw, MAX_VERSION_LEN);
 	g_strlcpy((gchar *)data->szRfCalDate, rf, MAX_VERSION_LEN);
 	g_strlcpy((gchar *)data->szProductCode, product, TAPI_MISC_PRODUCT_CODE_LEN_MAX);
+OUT:
+	g_free(sw);
+	g_free(hw);
+	g_free(rf);
+	g_free(product);
 
 	return data;
 }
@@ -284,14 +363,17 @@ EXPORT_API int tel_get_misc_me_imei(TapiHandle *handle, tapi_response_cb callbac
 {
 	struct tapi_resp_data *evt_cb_data = NULL;
 
-	dbg("Func Entrance");
+	TAPI_RET_ERR_NUM_IF_FAIL(handle, TAPI_API_INVALID_PTR);
+	TAPI_RET_ERR_NUM_IF_FAIL(callback, TAPI_API_INVALID_PTR);
 
 	MAKE_RESP_CB_DATA(evt_cb_data, handle, callback, user_data);
+
+	sdbg("[%s] Func Entrance", handle->cp_name);
 
 	g_dbus_connection_call(handle->dbus_connection,
 			DBUS_TELEPHONY_SERVICE , handle->path, DBUS_TELEPHONY_MODEM_INTERFACE,
 			"GetIMEI", NULL, NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL,
+			G_DBUS_CALL_FLAGS_NONE, TAPI_DEFAULT_TIMEOUT, handle->ca,
 			on_response_get_imei, evt_cb_data);
 
 	return TAPI_API_SUCCESS;
@@ -300,20 +382,34 @@ EXPORT_API int tel_get_misc_me_imei(TapiHandle *handle, tapi_response_cb callbac
 EXPORT_API char *tel_get_misc_me_imei_sync(TapiHandle *handle)
 {
 	GVariant *dbus_result;
+	GError *error = NULL;
 	char *imei = NULL;
 	int result = 0;
 
-	dbg("Func Entrance");
+	TAPI_RET_ERR_NUM_IF_FAIL(handle, NULL);
 
-	if (!handle)
-		return NULL;
+	sdbg("[%s] Func Entrance", handle->cp_name);
 
 	dbus_result = g_dbus_connection_call_sync(handle->dbus_connection,
 			DBUS_TELEPHONY_SERVICE , handle->path, DBUS_TELEPHONY_MODEM_INTERFACE,
 			"GetIMEI", NULL, NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL);
+			G_DBUS_CALL_FLAGS_NONE, TAPI_SHORT_TIMEOUT, handle->ca, &error);
+
+	if (error) {
+		warn("dbus error = %d (%s)", error->code, error->message);
+		g_error_free(error);
+	}
+
+	if (!dbus_result)
+		return NULL;
 
 	g_variant_get (dbus_result, "(is)", &result, &imei);
+	g_variant_unref(dbus_result);
+
+	if (result != 0) {
+		g_free(imei);
+		return NULL;
+	}
 
 	return imei;
 }
@@ -322,66 +418,87 @@ EXPORT_API int tel_get_misc_me_sn(TapiHandle *handle, tapi_response_cb callback,
 {
 	struct tapi_resp_data *evt_cb_data = NULL;
 
-	dbg("Func Entrance");
+	TAPI_RET_ERR_NUM_IF_FAIL(handle, TAPI_API_INVALID_PTR);
+	TAPI_RET_ERR_NUM_IF_FAIL(callback, TAPI_API_INVALID_PTR);
 
 	MAKE_RESP_CB_DATA(evt_cb_data, handle, callback, user_data);
+
+	sdbg("[%s] Func Entrance", handle->cp_name);
 
 	g_dbus_connection_call(handle->dbus_connection,
 			DBUS_TELEPHONY_SERVICE , handle->path, DBUS_TELEPHONY_MODEM_INTERFACE,
 			"GetSerialNumber", NULL, NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL,
+			G_DBUS_CALL_FLAGS_NONE, TAPI_DEFAULT_TIMEOUT, handle->ca,
 			on_response_get_serial_number, evt_cb_data);
 
 	return TAPI_API_SUCCESS;
 }
 
-EXPORT_API char *tel_get_misc_me_sn_sync(TapiHandle *handle)
+EXPORT_API TelMiscSNInformation *tel_get_misc_me_sn_sync(TapiHandle *handle)
 {
 	GVariant *dbus_result;
-	char *sn = NULL;
+	GError *error = NULL;
+	char *sn = NULL, *meid = NULL,*imei = NULL, *imeisv = NULL;
+	TelMiscSNInformation *data = NULL;
 	int result = 0;
 
-	dbg("Func Entrance");
+	TAPI_RET_ERR_NUM_IF_FAIL(handle, NULL);
 
-	if (!handle)
-		return NULL;
+	sdbg("[%s] Func Entrance", handle->cp_name);
 
 	dbus_result = g_dbus_connection_call_sync(handle->dbus_connection,
 			DBUS_TELEPHONY_SERVICE , handle->path, DBUS_TELEPHONY_MODEM_INTERFACE,
 			"GetSerialNumber", NULL, NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL);
+			G_DBUS_CALL_FLAGS_NONE, TAPI_SHORT_TIMEOUT, handle->ca, &error);
+	if (error) {
+		warn("dbus error = %d (%s)", error->code, error->message);
+		g_error_free(error);
+	}
 
-	g_variant_get (dbus_result, "(is)", &result, &sn);
+	if (!dbus_result)
+		return NULL;
 
-	return sn;
+	g_variant_get (dbus_result, "(issss)", &result, &sn, &meid, &imei, &imeisv);
+	g_variant_unref(dbus_result);
+
+	if (result != 0)
+		goto OUT;
+
+	data = calloc(1, sizeof(TelMiscSNInformation));
+	if (!data)
+		goto OUT;
+
+	g_strlcpy((gchar *)data->szEsn, sn, TAPI_MISC_ME_SN_LEN_MAX);
+	g_strlcpy((gchar *)data->szMeid, meid, TAPI_MISC_ME_SN_LEN_MAX);
+	g_strlcpy((gchar *)data->szImei, imei, TAPI_MISC_ME_SN_LEN_MAX);
+	g_strlcpy((gchar *)data->szImeiSv, imeisv, TAPI_MISC_ME_SN_LEN_MAX);
+
+OUT:
+	g_free(sn);
+	g_free(meid);
+	g_free(imei);
+	g_free(imeisv);
+
+	return data;
 }
 
 EXPORT_API int tel_check_modem_power_status(TapiHandle *handle, int *result)
 {
-	return tel_get_property_int(handle, TAPI_PROP_MODEM_POWER, result);
-}
+	int ret = TAPI_API_SUCCESS;
 
-EXPORT_API int tel_control_modem_dun_pin_ctrl(TapiHandle *handle, tapi_ps_btdun_pincontrol *pincontrol, tapi_response_cb callback, void *user_data)
-{
-	struct tapi_resp_data *evt_cb_data = NULL;
-	GVariant *param;
+	TAPI_RET_ERR_NUM_IF_FAIL(handle, TAPI_API_INVALID_PTR);
+	TAPI_RET_ERR_NUM_IF_FAIL(result, TAPI_API_INVALID_PTR);
 
-	dbg("Func Entrance ");
-
-	if (!handle || !handle->dbus_connection || !pincontrol){
-		dbg("invalid parameter");
-		return TAPI_API_INVALID_INPUT;
+	ret = tel_get_property_int(handle, TAPI_PROP_MODEM_POWER, result);
+	if (ret == TAPI_API_ACCESS_DENIED) {
+		err("Access denied");
+		return ret;
+	} else if (ret != TAPI_API_SUCCESS) {
+		err("failed. (ret=%d)", ret);
+		return ret;
 	}
 
-	MAKE_RESP_CB_DATA(evt_cb_data, handle, callback, user_data);
+	msg("[%s] modem_power_status = %d (0=on,1=off,2=rst,3=low)", handle->cp_name, *result);
 
-	param = g_variant_new("(ib)", pincontrol->signal, pincontrol->status);
-
-	g_dbus_connection_call(handle->dbus_connection,
-			DBUS_TELEPHONY_SERVICE , handle->path, DBUS_TELEPHONY_MODEM_INTERFACE,
-			"SetDunPinCtrl", param, NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL,
-			on_response_set_dun_pin_ctrl, evt_cb_data);
-
-	return TAPI_API_SUCCESS;
+	return ret;
 }

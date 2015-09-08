@@ -1,7 +1,7 @@
 /*
  * libslp-tapi
  *
- * Copyright (c) 2011 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Contact: Ja-young Gu <jygu@samsung.com>
  *
@@ -19,17 +19,13 @@
  */
 
 /**
-* @open
-* @ingroup		TelephonyAPI
-* @addtogroup	SAT_TAPI	SAT
-* @{
-*
-* @file ITapiSat.h
+ * @file ITapiSat.h
+ */
 
-     @brief This file serves as a "C" header file defines functions for Tapi Sat Services.\n
-      It contains a sample set of function prototypes that would be required by applications.
-
-      Note: Telephony SAT functionality is message relaying from USIM application to SAT related applications.
+/**
+ * @internal
+ * @addtogroup CAPI_TELEPHONY_SERVICE_SAT
+ * @{
  */
 
 #ifndef _ITAPI_SAT_H_
@@ -37,368 +33,225 @@
 
 #include <tapi_common.h>
 #include <TelSat.h>
-#include <TelDefines.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
- /**
+/**
  * @brief Sends the user choice of the main menu options to the USIM.
  *
- * @par Notes:
- * A set of possible menu options is supplied by the USIM
- * using the proactive command SET UP MENU. Telephony server receives the command
- * and publishes this information.SAT UI application should list the menu when it initially launched.
- * If the user subsequently chooses an option, then SAT UI application replies
- * the command with user's choice using this API.
+ * @details <b> Notes: </b>
+ *          A set of possible menu options are supplied by the USIM
+ *          using the proactive command SET UP MENU. The telephony server receives the command
+ *          and publishes this information. The SAT UI application should list the menu when it is initially launched.
+ *          If the user subsequently chooses an option, then the SAT UI application replies to
+ *          the command with the user's choice using this API. \n
  *
- * This API makes Dbus method call to Telephony Sever and gets immediate feedback.
- * However it just means that the API request has been transfered to the CP successfully.
- * The actual operation result is delivered with the async response as below.
+ *          This API makes a Dbus method call to the Telephony Server and gets an immediate feedback.
+ *          However it just means that the API request has been transfered to the CP successfully.
+ *          The actual operation result is delivered with the async response as below. \n
  *
- * @par Warning:
- * Do not use this function. This function is dedicated to the SAT UI embedded application only.
+ *          <b> Sync (or) Async: </b> This is an Asynchronous API. \n
  *
- * @par Sync (or) Async:
- * This is an Asynchronous API.
+ *          <b> Prospective Clients: </b> SAT-UI.
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] pMenuSelect
- * - #TelSatMenuSelectionReqInfo_t contains information like which SAT menu item has been selected or whether Help is required.
+ * @remarks You must not use this function. This function is dedicated to the SAT UI embedded application only.
  *
- * @param [in] callback
- * - To register callback function for result.
+ * @param[in] handle The handle from tel_init()
  *
- * @param [in] user_data
- * - user_data for user specification.
+ * @param[in] pMenuSelect #TelSatMenuSelectionReqInfo_t contains information like which SAT menu item has been selected or whether help is required
  *
- * @par Async Response Message:
- * - The event associated is TAPI_EVENT_SAT_MENU_SELECTION_CNF and the Asynchronous return status is indicated by #TelSatEnvelopeResp_t.
+ * @param[in] callback To register a callback function for result
  *
- * @pre
- *  - This function supposed to be called after getting TAPI_EVENT_SAT_SETUP_MENU_IND event from telephony server\n
+ * @param[in] user_data The user data for user specification
  *
- * @post
- *  - None
+ * @return The return type (int)\n
+ *         #TAPI_API_SUCCESS - indicates that the operation has completed successfully,\n
+ *         else it will return failure and an error code (Refer #TapiResult_t).
  *
- * @return Return Type (int) \n
- * - TAPI_API_SUCCESS - indicating that the operation has completed successfully. \n
- * - Else it will return failure and error code (Refer #TapiResult_t)
+ * @pre This function is supposed to be called after getting the #TAPI_EVENT_SAT_SETUP_MENU_IND event from the telephony server.
  *
- * @par Prospective Clients:
- * SAT-UI
- *
- * @see tel_get_sat_main_menu_info
- *
- * @code
- * #include <ITapiSat.h>
- * int ret_status =0;
- * int pRequestID=0;
- * TelSatMenuSelectionReqInfo_t selected_menu;
- * selected_menu.itemIdentifier = '1'; //selected menu num
- * selected_menu.bIsHelpRequested = 0;
- * ret_status = tel_select_sat_menu(&selected_menu, &pRequestId);
- * @endcode
- *
- * @remarks None
- *
- *
+ * @see tel_get_sat_main_menu_info()
  */
-/*================================================================================================*/
 int tel_select_sat_menu(TapiHandle *handle, const TelSatMenuSelectionReqInfo_t* pMenuSelect, tapi_response_cb callback, void *user_data);
 
- /**
- * @brief  Download SAT events to USIM
+/**
+ * @brief Downloads SAT events to the USIM.
  *
- * @par Notes:
- * A set of events for the terminal to monitor can be supplied by the USIM using the proactive command SET UP EVENT
- * LIST. If the USIM has sent this command, and an event which is part of the list subsequently occurs, the terminal
- * informs the USIM using this function, relevant for that event.
- * If USIM commands to monitor a browser termination event, the SAT-UI application has to call this function.
+ * @details <b> Notes: </b>
+ *          A set of events for the terminal to monitor can be supplied by the USIM using the proactive command SET UP EVENT
+ *          LIST. If the USIM has sent this command, and an event which is part of the list subsequently occurs, the terminal
+ *          informs the USIM using this function, relevant for that event.
+ *          If the USIM commands to monitor a browser termination event, the SAT-UI application has to call this function. \n
  *
- * This API makes Dbus method call to Telephony Sever and gets immediate feedback.
- * However it just means that the API request has been transfered to the CP successfully.
- * The actual operation result is delivered with the async response as below.
+ *          This API makes a Dbus method call to the Telephony Server and gets an immediate feedback.
+ *          However it just means that the API request has been transfered to the CP successfully.
+ *          The actual operation result is delivered with the async response as below. \n
  *
- * @par Warning:
- * Do not use this function. This function is dedicated to the SAT UI embedded application only.
+ *          <b> Sync (or) Async: </b> This is an Asynchronous API. \n
  *
- * @par Sync (or) Async:
- * This is an Asynchronous API.
+ *          <b> Prospective Clients: </b> SAT-UI \n
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] pEventData
- * - #TelSatEventDownloadReqInfo_t contains the necessary parameters like event type and information associated with it.
+ * @remarks You must not use this function. This function is dedicated to the SAT UI embedded application only.
  *
- * @param [in] callback
- * - To register callback function for result.
+ * @param[in] handle The handle from tel_init()
  *
- * @param [in] user_data
- * - user_data for user specification.
+ * @param[in] pEventData #TelSatEventDownloadReqInfo_t contains the necessary parameters like event types and information associated with it
  *
- * @par Async Response Message:
- * - The event associated is TAPI_EVENT_SAT_EVENT_DOWNLOAD_CNF and the Asynchronous return status is indicated by #TelSatEnvelopeResp_t.
+ * @param[in] callback To register a callback function for result
  *
- * @pre
- *  - A SET UP EVENT LIST proactive command supplies a set of event to monitor.
+ * @param[in] user_data The user data for user specification
  *
- * @post
- *  - None.
+ * @return The return type (int) \n
+ *         #TAPI_API_SUCCESS - indicates that the operation is completed successfully, \n
+ *         else it will return failure and an error code (Refer #TapiResult_t).
  *
- * @return Return Type (int) \n
- * - TAPI_API_SUCCESS - indicating that the operation has completed successfully. \n
- * - Else it will return failure and error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * SAT-UI
- *
- * @see None
- *
- * @code
- * #include <ITapiSat.h>
- * int ret_status =0;
- * int pRequestID=0;
- * TelSatEventDownloadReqInfo_t pEventData;
- * pEventData.eventDownloadType = TAPI_EVENT_SAT_DW_TYPE_IDLE_SCREEN_AVAILABLE;
- * pEventData.u.bIdleScreenAvailable = 1; //event occur or not
- * ret_status = tel_download_sat_event(&pEventData, &pRequestId);
- * @endcode
- *
- * @remarks None
- *
- *
+ * @pre A SET UP EVENT LIST proactive command supplies a set of events to monitor.
  */
-/*================================================================================================*/
 int tel_download_sat_event(TapiHandle *handle, const TelSatEventDownloadReqInfo_t*  pEventData, tapi_response_cb callback, void *user_data);
 
- /**
- * @brief  Send the UI display status of the alpha identifier of a specific proactive command to Telephony Server.
+/**
+ * @brief Sends the UI display status of the alpha identifier of a specific proactive command to the Telephony Server.
  *
- * When SAT-UI receives a proactive command, SAT-UI should draw a UI for relevant command.
- * As it completes , SAT-UI inform USIM with this function. Afterwards, USIM is getting ready to send another commands.
+ * @details When SAT-UI receives a proactive command, SAT-UI should draw a UI for the relevant command.
+ *          As it completes, SAT-UI informs the USIM by calling this function. Afterwards, the USIM is getting ready to send another command. \n
  *
- * This function makes Dbus method call to Telephony Sever and gets immediate feedback.
+ *          This function makes a Dbus method call to the Telephony Server and gets an immediate feedback. \n
  *
- * @par Warning:
- * Do not use this function. This function is dedicated to the SAT UI embedded application only.
+ *          <b> Sync (or) Async: </b> This is a Synchronous API. \n
  *
- * @par Sync (or) Async:
- * This is a Synchronous API.
+ *          <b> Prospective Clients: </b> SAT-UI \n
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] commandId
- * - Specific proactive command id from the Application
+ * @remarks You must not use this function. This function is dedicated to the SAT UI embedded application only.
  *
- * @param [in] status
- * - #TelSatUiDisplayStatusType_t contain display status(SUCCESS/FAIL).
+ * @param[in] handle The handle from tel_init()
  *
- * @par Async Response Message:
- * - None.
+ * @param[in] commandId The proactive command ID from the application
  *
- * @pre
- *  - Display request for the alpha identifier of a Proactive Command should be sent by Telephony Server.
+ * @param[in] status #TelSatUiDisplayStatusType_t contains the display status(SUCCESS/FAIL)
  *
- * @post
- *  - If the display status is SUCCESS Telephony Server sends a request to application for Proactive Command Execution.
- *  - If the display status is FAIL Telephony Server sends Terminal Response for the Proactive Command.
+ * @return The return type (int)\n
+ *         #TAPI_API_SUCCESS - indicates that the operation has completed successfully,\n
+ *         else it will return failure and an error code (Refer #TapiResult_t).
  *
- * @return Return Type (int) \n
- * - TAPI_API_SUCCESS - indicating that the operation has completed successfully. \n
- * - Else it will return failure and error code (Refer #TapiResult_t)
+ * @pre The display request for the alpha identifier of a Proactive Command should be sent by the Telephony Server.
  *
- * @par Prospective Clients:
- * SAT-UI
- *
- * @see None
- *
- * @code
- * #include <ITapiSat.h>
- * int commandId = 1; //this value should be server given value
- * ret_status = 0;
- * ret_status = tel_send_ui_display_status(1, TAPI_SAT_DISPLAY_SUCCESS);
- * @endcode
- *
- * @remarks None
- *
- *
+ * @post If the display status is SUCCESS, the Telephony Server sends a request to the application for Proactive Command Execution.
+ *       If the display status is FAIL, the Telephony Server sends a Terminal Response for the Proactive Command.
  */
-/*================================================================================================*/
 int tel_send_sat_ui_display_status(TapiHandle *handle, int commandId, TelSatUiDisplayStatusType_t status);
 
- /**
- * @brief  This function sends the UI User confirmation data for a specific Proactive Command to the Telephony Server.
+/**
+ * @brief Sends UI User confirmation data for a specific Proactive Command to the Telephony Server.
  *
- * In case that the proactive commands need user response, SAT-UI can send it using this function.
- * The response can be 'OK', 'Cancel', 'Move Back' and 'End Session'. Upon this response, USIM can send
- * a proactive command subsequently to indicate next UI action.
+ * @details In case the proactive commands need user response, SAT-UI can send it using this function.
+ *          The response can be 'OK', 'Cancel', 'Move Back', and 'End Session'. Upon this response, the USIM can send
+ *          a proactive command subsequently to indicate the next UI action. \n
  *
- * This function makes Dbus method call to Telephony Sever and gets immediate feedback.
+ *          This function makes a Dbus method call to the Telephony Server and gets an immediate feedback. \n
  *
- * @par Warning:
- * Do not use this function. This function is dedicated to the SAT UI embedded application only.
+ *          <b> Sync (or) Async: </b> This is a synchronous API. \n
  *
- * @par Sync (or) Async:
- * This is a synchronous API.
+ *          <b> Prospective Clients: </b> SAT-UI. \n
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- *@param [in] pUserConfirmData
- * -#TelSatUiUserConfirmInfo_t contains Specific user confirmation data.
+ * @remarks You must not use this function. This function is dedicated to the SAT UI embedded application only.
  *
- * @par Async Response Message:
- * - None
+ * @param[in] handle The handle from tel_init()
  *
- * @pre
- *  - User Confirmation request for a specific Proactive Command should be sent to application by Telephony Server.
+ * @param[in] pUserConfirmData #TelSatUiUserConfirmInfo_t contains specific user confirmation data
  *
- * @post
- *  - If the User Confirmation is positive Telephony Server sends a request to application for Proactive Command Execution.
- *  - If the User Confirmation is negative Telephony Server sends Terminal Response for the Proactive Command.
+ * @return The return type (int)\n
+ *         #TAPI_API_SUCCESS - indicates that the operation has completed successfully,\n
+ *         else it will return failure and an error code (Refer #TapiResult_t).
  *
- * @return Return Type (int) \n
- * - TAPI_API_SUCCESS - indicating that the operation has completed successfully. \n
- * - Else it will return failure and error code (Refer #TapiResult_t)
+ * @pre The User Confirmation request for a specific Proactive Command should be sent to the application by the Telephony Server.
  *
- * @par Prospective Clients:
- * SAT-UI
- *
- * @see None
- *
- * @code
- * #include <ITapiSat.h>
- * int ret_status =0;
- * TelSatUiUserConfirmInfo_t cfm_data;
- * cfm_data.commandId = '1'; //this value should be server given value
- * cfm_data.commandType = TAPI_SAT_CMD_TYPE_SETUP_CALL;
- * cfm_data.keyType = TAPI_SAT_USER_CONFIRM_YES;
- * ret_status = tel_send_sat_ui_user_confirm(&cfm_data);
- * @endcode
- *
- * @remarks None
- *
- *
+ * @post If the User Confirmation is positive, the Telephony Server sends a request to the application for Proactive Command Execution.
+ *       If the User Confirmation is negative, the Telephony Server sends a Terminal Response for the Proactive Command.
  */
-/*================================================================================================*/
 int tel_send_sat_ui_user_confirm(TapiHandle *handle, TelSatUiUserConfirmInfo_t *pUserConfirmData);
 
- /**
- * @brief  This function provides SAT(Sim Application toolkit) Main Menu information for SAT-UI.
+/**
+ * @brief Provides SAT(Sim Application toolkit) Main Menu information for SAT-UI.
  *
- * Once the USIM supplies the SET UP MENU proactivae command, telephony server not only publish
- * TAPI_EVENT_SAT_SETUP_MENU_IND event but also caches the menu information.
- * The SAT-UI applicatoin can get the menu list using this function.
+ * @details Once the USIM supplies the SET UP MENU proactive command, the telephony server not only publishes the
+ *          #TAPI_EVENT_SAT_SETUP_MENU_IND event but also caches the menu information.
+ *          The SAT-UI application can get the menu list using this function. \n
  *
- * This function makes Dbus method call to Telephony Sever and gets immediate feedback.
+ *          This function makes a Dbus method call to the Telephony Server and gets an immediate feedback. \n
  *
- * @par Warning:
- * Do not use this function. This function is dedicated to the SAT UI embedded application only.
+ *         <b> Sync (or) Async: </b> This is a Synchronous API. \n
  *
- * @par Sync (or) Async:
- * This is a Synchronous API.
+ *         <b> Prospective Clients: </b> SAT-UI.
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/telephony
  *
- * @param [out] pMainMenu
- * - #TelSatSetupMenuInfo_t contain all menu related information which are required like menu title, icon, item count, etc.
+ * @remarks You must not use this function. This function is dedicated to the SAT UI embedded application only.
  *
- * @par Async Response Message:
- * - None
+ * @param[in] handle The handle from tel_init()
  *
- * @pre
- *  - When SAT SIM is inserted. we can get meaningful data. without SAT SIM, Null is returned
+ * @param[out] pMainMenu #TelSatSetupMenuInfo_t contains all menu related information which is required such as a menu title, an icon, an item count, and so on
  *
- * @post
- *  - None.
+ * @return The return type (int)\n
+ *         #TAPI_API_SUCCESS - indicates that the operation has completed successfully,\n
+ *         else it will return failure and an error code (Refer #TapiResult_t).
  *
- * @return Return Type (int) \n
- * - TAPI_API_SUCCESS - indicating that the operation has completed successfully. \n
- * - Else it will return failure and error code (Refer #TapiResult_t)
+ * @pre When SAT SIM is inserted we can get meaningful data. Without SAT SIM, null is returned.
  *
- * @par Prospective Clients:
- * SAT-UI
- *
- * @see tel_select_sat_menu
- *
- * @code
- * #include <ITapiSat.h>
- * int ret_status =0;
- * TelSatSetupMenuInfo_t menu; //this struct will be pull up with SIM menu info
- * ret_status = tel_get_sat_main_menu_info(&menu);
- * @endcode
- *
- * @remarks None
- *
- *
+ * @see tel_select_sat_menu()
  */
-/*================================================================================================*/
 int tel_get_sat_main_menu_info(TapiHandle *handle, TelSatSetupMenuInfo_t *pMainMenu);
 
- /**
- * @brief  This API provides the Operation result(s) for the Proactive Command execution by the Application(s) to the Telephony Server.
+/**
+ * @brief Provides the Operation result(s) for Proactive Command execution by the Application(s) to the Telephony Server.
  *
- * The USIM commands the terminal to do some predefined action, such as sending short message,
- * making a voice call, launching an Internet browser and so on. Those actions are defined by 3GPP TS31.111.
- * Once a application executes the requested action by USIM, it reports the operation result to USIM using this function.
+ * @details The USIM commands the terminal to do some predefined action, such as sending a short message,
+ *          making a voice call, launching an Internet browser, and so on. Those actions are defined by 3GPP TS31.111.
+ *          Once an application executes the requested action by USIM, it reports the operation result to the USIM using this function. \n
  *
- * This function makes Dbus method call to Telephony Sever and gets immediate feedback.
+ *          This function makes a Dbus method call to the Telephony Server and gets an immediate feedback. \n
  *
- * @par Warning:
- * Do not use this function. This function is dedicated to the SAT UI embedded application only.
- **
- * @par Sync (or) Async:
- * This is a Synchronous API.
+ *          <b> Sync (or) Async: </b> This is a Synchronous API. \n
  *
- * @param [in] handle
- * - handle from tel_init().
+ *          <b> Prospective Clients: </b> Embeded applications which are predefined by 3GPP TS31.111.
  *
- * @param [out] pAppRetInfo
- * - #TelSatAppsRetInfo_t contains execution result of a specific proactive command by application.
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @par Async Response Message:
- * - None
+ * @remarks You must not use this function. This function is dedicated to the SAT UI embedded application only.
  *
- * @pre
- *  - Proactive Command execution request should be sent by Telephony Server to SAT related applications.
+ * @param[in] handle The handle from tel_init()
  *
- * @post
- *  - None.
+ * @param[out] pAppRetInfo #TelSatAppsRetInfo_t contains an execution result of a specific proactive command by the application
  *
- * @return Return Type (int) \n
- * - TAPI_API_SUCCESS - indicating that the operation has completed successfully. \n
- * - Else it will return failure and error code (Refer #TapiResult_t)
+ * @return The return type (int)\n
+ *         #TAPI_API_SUCCESS - indicates that the operation has completed successfully,\n
+ *         else it will return failure and an error code (Refer #TapiResult_t).
  *
- * @par Prospective Clients:
- * Embeded applications which are predefined by 3GPP TS31.111
- *
- * @see None
- *
- * @code
- * #include <ITapiSat.h>
- * int ret_status =0;
- * TelSatAppsRetInfo_t app_ret;
- * app_ret.commandType = TAPI_SAT_CMD_TYPE_SETUP_CALL;
- * app_ret.commandId = 1; //this value should be server given value
- * app_ret.appsRet.setupCall.resp = TAPI_SAT_R_SUCCESS;
- * ret_status = tel_send_sat_app_exec_result(&app_ret);
- * @endcode
- *
- * @remarks None
- *
- *
+ * @pre The Proactive Command execution request should be sent by the Telephony Server to SAT related applications.
  */
-/*================================================================================================*/
 int tel_send_sat_app_exec_result(TapiHandle *handle, TelSatAppsRetInfo_t *pAppRetInfo);
-
 
 #ifdef __cplusplus
 }

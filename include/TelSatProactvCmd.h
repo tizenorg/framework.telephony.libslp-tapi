@@ -1,7 +1,7 @@
 /*
  * libslp-tapi
  *
- * Copyright (c) 2011 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Contact: Ja-young Gu <jygu@samsung.com>
  *
@@ -19,15 +19,13 @@
  */
 
 /**
- * @open
- * @ingroup		TelephonyAPI
- * @addtogroup	SAT_TAPI	SAT
- * @{
- *
  * @file TelSatProactvCmd.h
+ */
 
- @brief This file serves as a "C" header file defines structures for Tapi SAT Proactive commands and terminal response Services. \n
- It contains a sample set of constants, enums, structs that would be required by applications.
+/**
+ * @internal
+ * @addtogroup CAPI_TELEPHONY_SERVICE_SAT
+ * @{
  */
 
 #ifndef _TEL_SAT_PROACTV_CMD_H_
@@ -40,657 +38,719 @@ extern "C"
 {
 #endif
 
-#define TAPI_SAT_MENU_ITEM_COUNT_MAX			40	/**<	max count of sat menu items	*/
-#define TAPI_SAT_PROVISIONING_REF_MAX_COUNT		10	/**<	max count of sat provisioning reference	*/
+/**
+ * @brief Definition for the max count of SAT menu items.
+ * @since_tizen 2.3
+ */
+#define TAPI_SAT_MENU_ITEM_COUNT_MAX			40
+/**
+ * @brief Definition for the max count of SAT provisioning reference.
+ * @since_tizen 2.3
+ */
+#define TAPI_SAT_PROVISIONING_REF_MAX_COUNT		10
 
 /**
- * This structure contains the data objects for DISPLAY TEXT proactive command indication.
+ * @brief The structure type containing the data objects for DISPLAY TEXT proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices */
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
 } TelSatMoreTimeIndInfo_t;
 
 /**
- * This structure contains the data objects for DISPLAY TEXT proactive command indication.
+ * @brief The structure type containing the data objects for DISPLAY TEXT proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatTextTypeInfo_t text; /**<	display text info	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	int bImmediateRespRequested; /**<	flag for checking whether immediate response required or not	*/
-	TelSatDurationInfo_t duration; /**<	duration for which text should be displayed	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
+	TelSatTextTypeInfo_t text; /**<	Display text info */
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	int bImmediateRespRequested; /**< Flag for checking whether immediate response is required */
+	TelSatDurationInfo_t duration; /**<	Duration for which text should be displayed	*/
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align, and so on */
 } TelSatDisplayTextIndInfo_t;
 
 /**
- * This structure contains the data objects for GET INKEY proactive command indication.
+ * @brief The structure type containing the data objects for GET INKEY proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatTextTypeInfo_t text; /**<	display text info	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatDurationInfo_t duration; /**<	duration for which text should be displayed	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatTextTypeInfo_t text; /**<	Display text info */
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatDurationInfo_t duration; /**<	Duration for which text should be displayed	*/
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatGetInkeyIndInfo_t;
 
 /**
- * This structure contains the data objects for GET INPUT proactive command indication.
+ * @brief The structure type containing the data objects for GET INPUT proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatTextTypeInfo_t text; /**<	display text info	*/
-	TelSatRespLenInfo_t respLen; /**<	input response length	*/
-	TelSatTextTypeInfo_t defaultText; /**<	default text info	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
+	TelSatTextTypeInfo_t text; /**<	Display text info */
+	TelSatRespLenInfo_t respLen; /**< Input response length	*/
+	TelSatTextTypeInfo_t defaultText; /**< Default text info */
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatGetInputIndInfo_t;
 
 /**
- * This structure contains the data objects for PLAY TONE proactive command indication.
+ * @brief The structure type containing the data objects for PLAY TONE proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatToneInfo_t tone; /**<	tone info	*/
-	TelSatDurationInfo_t duration; /**<	duration for which tone should be played	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatToneInfo_t tone; /**<	Tone info */
+	TelSatDurationInfo_t duration; /**<	Duration for which tone should be played */
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatPlayToneIndInfo_t;
 
 /**
- * This structure contains the data objects for SETUP MENU proactive command indication.
+ * @brief The structure type containing the data objects for SETUP MENU proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	unsigned char menuItemCount; /**<	count of menu items	*/
-	TelSatMenuItemInfo_t menuItem[TAPI_SAT_MENU_ITEM_COUNT_MAX]; /**<	menu item data	*/
-	TelSatItemsNextActionIndiListInfo_t itemNextActionIndList; /**<	next action indication list	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatIconIdentifierListInfo_t iconIdList; /**<	icon identifier list info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
-	TelSatTextAttributeListInfo_t itemTextAttributeList; /**<	item text attribute list	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	unsigned char menuItemCount; /**< Count of menu items */
+	TelSatMenuItemInfo_t menuItem[TAPI_SAT_MENU_ITEM_COUNT_MAX]; /**< Menu item data */
+	TelSatItemsNextActionIndiListInfo_t itemNextActionIndList; /**<	Next action indication list	*/
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatIconIdentifierListInfo_t iconIdList; /**<	Icon identifier list info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
+	TelSatTextAttributeListInfo_t itemTextAttributeList; /**< Item text attribute list */
 } TelSatSetupMenuIndInfo_t;
 
 /**
- * This structure contains the data objects for SELECT ITEM proactive command indication data.
+ * @brief The structure type containing the data objects for SELECT ITEM proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatItemsNextActionIndiListInfo_t itemNextActionIndList; /**<	next action indication list	*/
-	unsigned char defaultItemIdentifier; /**<	default item identifier(default selected item id)	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatIconIdentifierListInfo_t iconIdList; /**<	icon identifier list info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
-	TelSatTextAttributeListInfo_t itemTextAttributeList; /**<	item text attribute list	*/
-	unsigned char menuItemCount; /**<	count of menu items	*/
-	TelSatMenuItemInfo_t menuItem[TAPI_SAT_MENU_ITEM_COUNT_MAX]; /**<	menu item data	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatItemsNextActionIndiListInfo_t itemNextActionIndList; /**<	Next action indication list	*/
+	unsigned char defaultItemIdentifier; /**< Default item identifier(default selected item ID)	*/
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatIconIdentifierListInfo_t iconIdList; /**<	Icon identifier list info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
+	TelSatTextAttributeListInfo_t itemTextAttributeList; /**< Item text attribute list */
+	unsigned char menuItemCount; /**< Count of menu items */
+	TelSatMenuItemInfo_t menuItem[TAPI_SAT_MENU_ITEM_COUNT_MAX]; /**< Menu item data */
 } TelSatSelectItemIndInfo_t;
 
 /**
- * This structure contains the data objects for SEND SHORT MESSAGE proactive command indication.
+ * @brief The structure type containing the data objects for SEND SHORT MESSAGE proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatAddressInfo_t address; /**<	address for sending sms	*/
-	TelSatSmsTpduInfo_t smsTpdu; /**<	sms tpdu info	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier	*/
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatAddressInfo_t address; /**< Address for sending SMS */
+	TelSatSmsTpduInfo_t smsTpdu; /**< SMS TPDU info	*/
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatSendSmsIndInfo_t;
 
 /**
- * This structure contains the data objects for SEND SS proactive command indication.
+ * @brief The structure type containing the data objects for SEND SS proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatSsStringInfo_t ssString; /**<	ss string	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier	*/
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatSsStringInfo_t ssString; /**< SS string */
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatSendSsIndInfo_t;
 
 /**
- * This structure contains the data objects for SEND USSD proactive command indication.
+ * @brief The structure type containing the data objects for SEND USSD proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatUssdStringInfo_t ussdString; /**<	ussd string info	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatUssdStringInfo_t ussdString; /**<	USSD string info */
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatSendUssdIndInfo_t;
 
 /**
- * This structure contains the data objects for SETUP CALL proactive command indication.
+ * @brief The structure type containing the data objects for SETUP CALL proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAddressInfo_t address; /**<	setup call address info*/
-	TelSatCapaConfigParamInfo_t ccp; /**<	capability configuration parameter	*/
-	TelSatSubAddressInfo_t subAddress; /**<	setup call sub address	*/
-	TelSatDurationInfo_t duration; /**<	command execution time duration	*/
-	TelSatAlphaIdentifierInfo_t userConfirmPhaseAlphaId;/**<	user Confirmation Phase AlphaId	*/
-	TelSatAlphaIdentifierInfo_t callSetupPhaseAlphaId; /**<	call Setup Phase AlphaId	*/
-	TelSatIconIdentifierInfo_t userConfirmPhaseIconId; /**<	user Confirmation Phase IconId	*/
-	TelSatIconIdentifierInfo_t callSetupPhaseIconId; /**<	call Setup Phase IconId	*/
-	TelSatTextAttributeInfo_t userConfirmPhaseTextAttribute; /**<	user Confirmation Phase Text Attribute	*/
-	TelSatTextAttributeInfo_t callSetupPhaseTextAttribute; /**<	call Setup PhaseText Attribute	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier	*/
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatAddressInfo_t address; /**< Setup call address info */
+	TelSatCapaConfigParamInfo_t ccp; /**< Capability configuration parameter */
+	TelSatSubAddressInfo_t subAddress; /**<	Setup call sub address */
+	TelSatDurationInfo_t duration; /**<	Command execution time duration	*/
+	TelSatAlphaIdentifierInfo_t userConfirmPhaseAlphaId;/**< User Confirmation Phase Alpha ID */
+	TelSatAlphaIdentifierInfo_t callSetupPhaseAlphaId; /**<	Call Setup Phase Alpha ID */
+	TelSatIconIdentifierInfo_t userConfirmPhaseIconId; /**<	User Confirmation Phase Icon ID	*/
+	TelSatIconIdentifierInfo_t callSetupPhaseIconId; /**< Call Setup Phase Icon ID */
+	TelSatTextAttributeInfo_t userConfirmPhaseTextAttribute; /**< User Confirmation Phase Text Attribute */
+	TelSatTextAttributeInfo_t callSetupPhaseTextAttribute; /**<	Call Setup Phase Text Attribute	*/
 } TelSatSetupCallIndInfo_t;
 
 /**
- * This structure contains the data objects for REFRESH proactive command indication.
+ * @brief The structure type containing the data objects for REFRESH proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatFileListInfo_t fileList; /**<	file list for refresh	*/
-	TelSatAidInfo_t aid; /**<	application Id	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
+	TelSatFileListInfo_t fileList; /**<	File list for refresh */
+	TelSatAidInfo_t aid; /**< Application ID */
 } TelSatRefreshIndInfo_t;
 
 /**
- * This structure contains the data objects for PROVIDE LOCAL INFO proactive command indication.
+ * @brief The structure type containing the data objects for PROVIDE LOCAL INFO proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
 
 } TelSatProvideLocalInfoIndInfo_t;
 
 /**
- * This structure contains the data objects for SETUP EVENT LIST proactive command indication data.
+ * @brief The structure type containing the data objects for SETUP EVENT LIST proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatEventListInfo_t eventList; /**<	event list contains events which are required by USIM application	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier	*/
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatEventListInfo_t eventList; /**< Event list structure type containing events which are required by the USIM application */
 
 } TelSatSetupEventListIndInfo_t;
 
 /**
- * This structure contains the data objects for SETUP IDLE MODE TEXT proactive command indication.
+ * @brief The structure type containing the data objects for SETUP IDLE MODE TEXT proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatTextTypeInfo_t text; /**<	text to be shown on idle screen	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier	*/
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatTextTypeInfo_t text; /**<	Text to be shown on an idle screen	*/
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatSetupIdleModeTextIndInfo_t;
 
 /**
- * This structure contains the data objects for SEND DTMF COMMAND proactive command indication.
+ * @brief The structure type containing the data objects for SEND DTMF COMMAND proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatDtmfStringInfo_t dtmfString; /**<	dtmf string	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier	*/
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatDtmfStringInfo_t dtmfString; /**<	DTMF string	*/
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatSendDtmfIndInfo_t;
 
 /**
- * This structure contains the data objects for LANGUAGE NOTIFICATION proactive command indication.
+ * @brief The structure type containing the data objects for LANGUAGE NOTIFICATION proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatLanguageInfo_t language; /**<	language info from USIM application	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier	*/
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatLanguageInfo_t language; /**<	Language info from the USIM application	*/
 } TelSatLanguageNotificationIndInfo_t;
 
 /**
- * This structure contains the data objects for LAUNCH BROWSER proactive command indication.
+ * @brief The structure type containing the data objects for LAUNCH BROWSER proactive command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatBrowserIdentitiesInfo_t browserId; /**<	browser identity	*/
-	TelSatUrlInfo_t url; /**<	url	*/
-	TelSatBearerInfo_t bearer; /**<	bearer which is used by browser	*/
-	unsigned char provisioningRefCount; /**<	provisioning reference count	*/
-	TelSatProvisioningRefInfo_t provisioningRef[TAPI_SAT_PROVISIONING_REF_MAX_COUNT]; /**<	provisioning reference data	*/
-	TelSatTextTypeInfo_t text; /**<	display text info	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. it includes command number, type, and qualifier	*/
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices	*/
+	TelSatBrowserIdentitiesInfo_t browserId; /**< Browser identity	*/
+	TelSatUrlInfo_t url; /**< URL */
+	TelSatBearerInfo_t bearer; /**<	Bearer which is used by the browser	*/
+	unsigned char provisioningRefCount; /**< Provisioning reference count */
+	TelSatProvisioningRefInfo_t provisioningRef[TAPI_SAT_PROVISIONING_REF_MAX_COUNT]; /**< Provisioning reference data */
+	TelSatTextTypeInfo_t text; /**<	Display text info */
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatLaunchBrowserIndInfo_t;
 
 /**
- * This structure contains the data objects for OPEN CHANNEL CSB proactive command indication data.
+ * @brief The structure type containing the data objects for OPEN CHANNEL CSB proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatAddressInfo_t address; /**<	channel address	*/
-	TelSatSubAddressInfo_t subAddress; /**<	channel sub address	*/
-	TelSatDurationInfo_t duration1; /**<	connection require time	*/
-	TelSatDurationInfo_t duration2; /**<	connection require time2	*/
-	TelSatBearerParametersCsdInfo_t bearerParamsCsd; /**<	csd info	*/
-	TelSatBufferSizeInfo_t bufferSize; /**<	bufferSize	*/
-	TelSatOtherAddressInfo_t otherAddress; /**<	otherAddress	*/
-	TelSatTextTypeInfo_t userLogin; /**<	userLogin	*/
-	TelSatTextTypeInfo_t userPassword; /**<	userPassword	*/
-	TelSatSimMeInterfaceTransportLevelInfo_t simMeInterfaceTransportLevel; /**<	simMeInterfaceTransportLevel	*/
-	TelSatOtherAddressInfo_t dataDestinationAddress; /**<	dataDestinationAddress	*/
+	TelSatAddressInfo_t address; /**< Channel address */
+	TelSatSubAddressInfo_t subAddress; /**<	Channel sub address	*/
+	TelSatDurationInfo_t duration1; /**< Connection require time */
+	TelSatDurationInfo_t duration2; /**< Connection require time 2 */
+	TelSatBearerParametersCsdInfo_t bearerParamsCsd; /**< CSD info */
+	TelSatBufferSizeInfo_t bufferSize; /**<	Buffer size	*/
+	TelSatOtherAddressInfo_t otherAddress; /**<	Other address */
+	TelSatTextTypeInfo_t userLogin; /**< User login	*/
+	TelSatTextTypeInfo_t userPassword; /**<	User password */
+	TelSatSimMeInterfaceTransportLevelInfo_t simMeInterfaceTransportLevel; /**<	SIM ME interface transport level */
+	TelSatOtherAddressInfo_t dataDestinationAddress; /**< Data destination address	*/
 } TelSatOpenChannelCsbInfo_t;
 
 /**
- * This structure contains the data objects for OPEN CHANNEL (packet) proactive command indication data.
+ * @brief The structure type containing the data objects for OPEN CHANNEL (packet) proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatBearerParametersGprsInfo_t bearerParamsGprs; /**<	gprs info	*/
-	TelSatBufferSizeInfo_t bufferSize; /**<	bufferSize	*/
-	TelSatnetworkAccessNameInfo_t networkAccessName; /**<	networkAccessName	*/
-	TelSatOtherAddressInfo_t otherAddress; /**<	otherAddress	*/
-	TelSatTextTypeInfo_t userLogin; /**<	userLogin	*/
-	TelSatTextTypeInfo_t userPassword; /**<	userPassword	*/
-	TelSatSimMeInterfaceTransportLevelInfo_t simMeInterfaceTransportLevel; /**<	simMeInterfaceTransportLevel	*/
-	TelSatOtherAddressInfo_t dataDestinationAddress; /**<	dataDestinationAddress	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatBearerParametersGprsInfo_t bearerParamsGprs; /**<	GPRS info */
+	TelSatBufferSizeInfo_t bufferSize; /**<	Buffer size	*/
+	TelSatnetworkAccessNameInfo_t networkAccessName; /**< Network access name */
+	TelSatOtherAddressInfo_t otherAddress; /**<	Other address */
+	TelSatTextTypeInfo_t userLogin; /**< User login	*/
+	TelSatTextTypeInfo_t userPassword; /**<	User password */
+	TelSatSimMeInterfaceTransportLevelInfo_t simMeInterfaceTransportLevel; /**<	SIM ME interface transport level */
+	TelSatOtherAddressInfo_t dataDestinationAddress; /**< Data destination address	*/
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatOpenChannelpdbInfo_t;
 
 /**
- * This structure contains the data objects for OPEN CHANNEL LOCAL LINK proactive command indication data.
+ * @brief The structure type containing the data objects for OPEN CHANNEL LOCAL LINK proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatDurationInfo_t duration1; /**<	command execution time duration1	*/
-	TelSatDurationInfo_t duration2; /**<	command execution time duration2	*/
-	TelSatBearerParametersLocalLinksInfo_t bearerParamsLocalLinks; /**<	local link info	*/
-	TelSatBufferSizeInfo_t bufferSize; /**<	bufferSize	*/
-	TelSatTextTypeInfo_t userPassword; /**<	userPassword	*/
-	TelSatSimMeInterfaceTransportLevelInfo_t simMeInterfaceTransportLevel; /**<	simMeInterfaceTransportLevel	*/
-	TelSatOtherAddressInfo_t dataDestinationAddress; /**<	dataDestinationAddress	*/
-	TelSatRemoteEntityAddressInfo_t remoteEntityAddress; /**<	remoteEntityAddress	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatDurationInfo_t duration1; /**< Command execution time duration1 */
+	TelSatDurationInfo_t duration2; /**< Command execution time duration2 */
+	TelSatBearerParametersLocalLinksInfo_t bearerParamsLocalLinks; /**<	Local link info	*/
+	TelSatBufferSizeInfo_t bufferSize; /**<	Buffer size	*/
+	TelSatTextTypeInfo_t userPassword; /**<	User password */
+	TelSatSimMeInterfaceTransportLevelInfo_t simMeInterfaceTransportLevel; /**<	SIM ME interface transport level */
+	TelSatOtherAddressInfo_t dataDestinationAddress; /**< Data destination address */
+	TelSatRemoteEntityAddressInfo_t remoteEntityAddress; /**< Remote entity address	*/
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatOpenChannelLocalBearerInfo_t;
 
 /**
- * This structure contains the data objects for OPEN CHANNEL (DEFAULT BEARER) proactive command indication data.
+ * @brief The structure type containing the data objects for OPEN CHANNEL (DEFAULT BEARER) proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatBufferSizeInfo_t bufferSize; /**<	bufferSize	*/
-	TelSatOtherAddressInfo_t otherAddress; /**<	otherAddress	*/
-	TelSatTextTypeInfo_t userLogin; /**<	userLogin	*/
-	TelSatTextTypeInfo_t userPassword; /**<	userPassword	*/
-	TelSatSimMeInterfaceTransportLevelInfo_t simMeInterfaceTransportLevel;/**<	simMeInterfaceTransportLevel	*/
-	TelSatOtherAddressInfo_t dataDestinationAddress; /**<	dataDestinationAddress	*/
+	TelSatBufferSizeInfo_t bufferSize; /**<	Buffer size	*/
+	TelSatOtherAddressInfo_t otherAddress; /**<	Other address */
+	TelSatTextTypeInfo_t userLogin; /**< User login	*/
+	TelSatTextTypeInfo_t userPassword; /**<	User password */
+	TelSatSimMeInterfaceTransportLevelInfo_t simMeInterfaceTransportLevel;/**< SIM ME interface transport level	*/
+	TelSatOtherAddressInfo_t dataDestinationAddress; /**< Data destination address */
 } TelSatOpenChannelDefaultBearerInfo_t;
 
 /**
- * This structure contains the data objects for OPEN CHANNEL (UICC Server Mode) proactive command indication data.
+ * @brief The structure type containing the data objects for OPEN CHANNEL (UICC Server Mode) proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatBufferSizeInfo_t bufferSize; /**<	bufferSize	*/
-	TelSatSimMeInterfaceTransportLevelInfo_t simMeInterfaceTransportLevel; /**<	simMeInterfaceTransportLevel	*/
+	TelSatBufferSizeInfo_t bufferSize; /**<	Buffer size	*/
+	TelSatSimMeInterfaceTransportLevelInfo_t simMeInterfaceTransportLevel; /**<	SIM ME interface transport level */
 } TelSatOpenChannelUiccServerModeInfo_t;
 
 /**
- * This structure contains the data objects for OPEN CHANNEL proactive command indication data.
+ * @brief The structure type containing the data objects for OPEN CHANNEL proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	int bIsUiccServerMode; /**<	flag whether UICC server mode or not	*/
-	TelSatBearerDescType_t bearerType; /**<	bearer destination type	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
+	int bIsUiccServerMode; /**<	Flag that indicates whether UICC server mode is active */
+	TelSatBearerDescType_t bearerType; /**<	Bearer destination type	*/
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
 	union {
-		TelSatOpenChannelCsbInfo_t csBearer; /**<	cs info	*/
-		TelSatOpenChannelpdbInfo_t pdBearer; /**<	pbd info	*/
-		TelSatOpenChannelLocalBearerInfo_t locBearer; /**<	local link info	*/
-		TelSatOpenChannelDefaultBearerInfo_t defaultBearer; /**<	defaultBearer	*/
-		TelSatOpenChannelUiccServerModeInfo_t uiccServerMode; /**<	uiccServerMode	*/
+		TelSatOpenChannelCsbInfo_t csBearer; /**< CS info */
+		TelSatOpenChannelpdbInfo_t pdBearer; /**< PBD info */
+		TelSatOpenChannelLocalBearerInfo_t locBearer; /**< Local link info */
+		TelSatOpenChannelDefaultBearerInfo_t defaultBearer; /**< Default bearer	*/
+		TelSatOpenChannelUiccServerModeInfo_t uiccServerMode; /**< UICC server mode	*/
 	} details; /**< Open Channel Details */
 } TelSatOpenChannelIndInfo_t;
 
 /**
- * This structure contains the data objects for CLOSE CHANNEL proactive command indication data.
+ * @brief The structure type containing the data objects for CLOSE CHANNEL proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatTextAttributeInfo_t textAttribute; /**<	text attribute info -e.g. bold, center align	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatTextAttributeInfo_t textAttribute; /**< Text attribute info - e.g. bold, center align	*/
 } TelSatCloseChannelIndInfo_t;
 
 /**
- * This structure contains the data objects for RECEIVE DATA proactive command indication data.
+ * @brief The structure type containing the data objects for RECEIVE DATA proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatChannelDataLengthInfo_t channelDataLen; /**<	channel data length	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatChannelDataLengthInfo_t channelDataLen; /**< Channel data length */
 } TelSatReceiveDataIndInfo_t;
 
 /**
- * This structure contains the data objects for SEND DATA proactive command indication data.
+ * @brief The structure type containing the data objects for SEND DATA proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
-	TelSatAlphaIdentifierInfo_t alphaId; /**<	alpha identifier(string) info	*/
-	TelSatIconIdentifierInfo_t iconId; /**<	icon identifier info	*/
-	TelSatChannelDataInfo_t channel_data; /**<	channel data for sending	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
+	TelSatAlphaIdentifierInfo_t alphaId; /**< Alpha identifier(string) info	*/
+	TelSatIconIdentifierInfo_t iconId; /**<	Icon identifier info */
+	TelSatChannelDataInfo_t channel_data; /**< Channel data for sending	*/
 } TelSatSendDataIndInfo_t;
 
 /**
- * This structure contains the data objects for GET CHANNEL STATUS proactive command indication data.
+ * @brief The structure type containing the data objects for GET CHANNEL STATUS proactive command indication data.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatCommandDetailInfo_t commandDetail; /**<	command detail info. includes command number, type, qualifier	*/
-	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	device identities info. includes source and destination devices	*/
+	TelSatCommandDetailInfo_t commandDetail; /**< Command detail info. It includes command number, type, and qualifier */
+	TelSatDeviceIdentitiesInfo_t deviceIdentities; /**<	Device identities info. It includes source and destination devices */
 } TelSatGetChannelStatusIndInfo_t;
 
 /**
- * This structure contains the data object for END PROACTIVE SESSION command indication.
+ * @brief The structure type containing the data object for END PROACTIVE SESSION command indication.
+ * @since_tizen 2.3
  */
 typedef struct {
 	TelSatCommandType_t commandType; /**<	proactive command type	*/
 } TelSatEndProactiveSessionIndInfo_t;
 
 /**
- * This structure contains the data objects for PROACTIVE command indication union data.
+ * @brief The structure type containing the data objects for PROACTIVE command indication union data.
+ * @since_tizen 2.3
  */
 typedef struct {
 	union {
-		TelSatMoreTimeIndInfo_t moreTime;
-		TelSatDisplayTextIndInfo_t displayText; /**<	Parsed proactive command info from TLV to Telephony data type - display text	*/
-		TelSatGetInkeyIndInfo_t getInkey; /**<	Parsed proactive command info from TLV to Telephony data type - getInkey	*/
-		TelSatGetInputIndInfo_t getInput; /**<	Parsed proactive command info from TLV to Telephony data type - getInput	*/
-		TelSatPlayToneIndInfo_t playTone; /**<	Parsed proactive command info from TLV to Telephony data type - play tone	*/
-		TelSatSetupMenuIndInfo_t setupMenu; /**<	Parsed proactive command info from TLV to Telephony data type - setup menu	*/
-		TelSatSelectItemIndInfo_t selectItem; /**<	Parsed proactive command info from TLV to Telephony data type - select item	*/
-		TelSatSendSmsIndInfo_t sendSms; /**<	Parsed proactive command info from TLV to Telephony data type - send sms	*/
-		TelSatSendSsIndInfo_t sendSs; /**<	Parsed proactive command info from TLV to Telephony data type - send ss	*/
-		TelSatSendUssdIndInfo_t sendUssd; /**<	Parsed proactive command info from TLV to Telephony data type - send  ussd	*/
-		TelSatSetupCallIndInfo_t setupCall; /**<	Parsed proactive command info from TLV to Telephony data type - setup call	*/
-		TelSatRefreshIndInfo_t refresh; /**<	Parsed proactive command info from TLV to Telephony data type - refresh	*/
-		TelSatProvideLocalInfoIndInfo_t provideLocInfo; /**<	Parsed proactive command info from TLV to Telephony data type - provide local info	*/
-		TelSatLaunchBrowserIndInfo_t launchBrowser; /**<	Parsed proactive command info from TLV to Telephony data type - launch browser	*/
-		TelSatSetupIdleModeTextIndInfo_t idleText; /**<	Parsed proactive command info from TLV to Telephony data type - setup idle mode text	*/
-		TelSatSendDtmfIndInfo_t sendDtmf; /**<	Parsed proactive command info from TLV to Telephony data type - send dtmf	*/
-		TelSatLanguageNotificationIndInfo_t languageNotification;/**<	Parsed proactive command info from TLV to Telephony data type - language notification	*/
-		TelSatSetupEventListIndInfo_t setupEventList; /**<	Parsed proactive command info from TLV to Telephony data type - setup event list	*/
-		TelSatOpenChannelIndInfo_t openChannel; /**<	Parsed proactive command info from TLV to Telephony data type - open channel	*/
-		TelSatCloseChannelIndInfo_t closeChannel; /**<	Parsed proactive command info from TLV to Telephony data type - close channel	*/
-		TelSatReceiveDataIndInfo_t receiveData; /**<	Parsed proactive command info from TLV to Telephony data type - receive data	*/
-		TelSatSendDataIndInfo_t sendData; /**<	Parsed proactive command info from TLV to Telephony data type - send data	*/
-		TelSatGetChannelStatusIndInfo_t getChannelStatus; /**<	Parsed proactive command info from TLV to Telephony data type - get channel status	*/
+		TelSatMoreTimeIndInfo_t moreTime;	/**< TBD */
+		TelSatDisplayTextIndInfo_t displayText; /**< Parsed proactive command info from TLV to Telephony data type - display text */
+		TelSatGetInkeyIndInfo_t getInkey; /**< Parsed proactive command info from TLV to Telephony data type - getInkey	*/
+		TelSatGetInputIndInfo_t getInput; /**< Parsed proactive command info from TLV to Telephony data type - getInput	*/
+		TelSatPlayToneIndInfo_t playTone; /**< Parsed proactive command info from TLV to Telephony data type - play tone */
+		TelSatSetupMenuIndInfo_t setupMenu; /**< Parsed proactive command info from TLV to Telephony data type - setup menu	*/
+		TelSatSelectItemIndInfo_t selectItem; /**< Parsed proactive command info from TLV to Telephony data type - select item */
+		TelSatSendSmsIndInfo_t sendSms; /**< Parsed proactive command info from TLV to Telephony data type - send SMS */
+		TelSatSendSsIndInfo_t sendSs; /**< Parsed proactive command info from TLV to Telephony data type - send SS */
+		TelSatSendUssdIndInfo_t sendUssd; /**< Parsed proactive command info from TLV to Telephony data type - send USSD */
+		TelSatSetupCallIndInfo_t setupCall; /**< Parsed proactive command info from TLV to Telephony data type - setup call	*/
+		TelSatRefreshIndInfo_t refresh; /**< Parsed proactive command info from TLV to Telephony data type - refresh */
+		TelSatProvideLocalInfoIndInfo_t provideLocInfo; /**< Parsed proactive command info from TLV to Telephony data type - provide local info	*/
+		TelSatLaunchBrowserIndInfo_t launchBrowser; /**< Parsed proactive command info from TLV to Telephony data type - launch browser	*/
+		TelSatSetupIdleModeTextIndInfo_t idleText; /**<	Parsed proactive command info from TLV to Telephony data type - setup idle mode text */
+		TelSatSendDtmfIndInfo_t sendDtmf; /**< Parsed proactive command info from TLV to Telephony data type - send DTMF */
+		TelSatLanguageNotificationIndInfo_t languageNotification;/**< Parsed proactive command info from TLV to Telephony data type - language notification	*/
+		TelSatSetupEventListIndInfo_t setupEventList; /**< Parsed proactive command info from TLV to Telephony data type - setup event list	*/
+		TelSatOpenChannelIndInfo_t openChannel; /**< Parsed proactive command info from TLV to Telephony data type - open channel */
+		TelSatCloseChannelIndInfo_t closeChannel; /**< Parsed proactive command info from TLV to Telephony data type - close channel */
+		TelSatReceiveDataIndInfo_t receiveData; /**< Parsed proactive command info from TLV to Telephony data type - receive data */
+		TelSatSendDataIndInfo_t sendData; /**< Parsed proactive command info from TLV to Telephony data type - send data */
+		TelSatGetChannelStatusIndInfo_t getChannelStatus; /**< Parsed proactive command info from TLV to Telephony data type - get channel status */
 	} cmdInfo; /**<	Union	*/
 } TelSatProactiveCmdData_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of DISPLAY TEXT proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the DISPLAY TEXT proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
 } TelSatDisplayTextRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of GET INKEY proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the GET INKEY proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	TelSatTextTypeInfo_t text; /**<	inserted key info	*/
-	TelSatDurationInfo_t duration;
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	TelSatTextTypeInfo_t text; /**<	Inserted key info */
+	TelSatDurationInfo_t duration;	/**< TBD */
 } TelSatGetInkeyRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of PLAY TONE proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the PLAY TONE proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
 } TelSatPlayToneRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of MORE TIME proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the MORE TIME proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
+	TelSatResultInfo_t result; /**<	Result that whether the current proactive command request is executed successfully */
 } TelSatMoreTimeRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of SETUP MENU proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the SETUP MENU proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
 } TelSatSetupMenuRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of GET INPUT proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the GET INPUT proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	TelSatTextTypeInfo_t text; /**<	inserted string info	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	TelSatTextTypeInfo_t text; /**<	Inserted string info */
 } TelSatGetInputRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of SELECT ITEM proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the SELECT ITEM proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	int bOtherInfo; /**<	flag to check whether other information is required or not	*/
-	unsigned char itemIdentifier; /**<	item identifier	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	int bOtherInfo; /**< Flag to check whether other information is required */
+	unsigned char itemIdentifier; /**< Item identifier */
 } TelSatSelectItemRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of PROVIDE LOCAL INFORMATION proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the PROVIDE LOCAL INFORMATION proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	int bOtherInfo; /**<	flag to check whether other information is required or not	*/
-	TelSatCmdQualiProvideLocalInfo_t infoType; /**<	local info type - e.g. time zone or language info, etc	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	int bOtherInfo; /**< Flag to check whether other information is required */
+	TelSatCmdQualiProvideLocalInfo_t infoType; /**<	Local info type - e.g. time zone or language info, and so on */
 	union {
-		TelSatDataTimeZoneInfo_t timeZoneInfo; /**<	current time zone info	*/
-		TelSatLanguageInfo_t languageInfo; /**<	current ME language setting info	*/
+		TelSatDataTimeZoneInfo_t timeZoneInfo; /**<	Current time zone info */
+		TelSatLanguageInfo_t languageInfo; /**<	Current ME language setting info */
 	} u; /**<	Union	*/
 } TelSatProvideLocalInfoRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of SETUP EVENT LIST proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the SETUP EVENT LIST proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
 } TelSatSetupEventListRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of SEND SMS proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the SEND SMS proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	TelSatCallCtrlProblemType_t additionalCallCtrlProblemInfo; /**<	call control problem	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	TelSatCallCtrlProblemType_t additionalCallCtrlProblemInfo; /**<	Call control problem */
 } TelSatSendSmsRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of SET UP CALL proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the SET UP CALL proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	int bOtherInfo; /**<	flag to check whether other information are required or not	*/
-	TelSatNetworkProblemType_t networkProblem; /**<	network problem during setup call	*/
-	TelSatCallCtrlProblemType_t permanentCallCtrlProblem; /**<	permanent call control problem	*/
-	TelSatCallCtrlRequestedActionInfo_t callCtrlRequestedAction; /**<	call control requested action info	*/
-	TelSatResultInfo_t result2; /**<	additional response on general result	*/
-	TelSatTextTypeInfo_t text; /**<	text string info	*/
-	int bIsTapiCause; /**<	flag to check whether tapi makes problem or not	*/
-	unsigned long tapiCause; /**<	tapi call level cause	*/
-	unsigned long tapiSsCause; /**<	tapi ss level cause	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	int bOtherInfo; /**< Flag to check whether other information is required */
+	TelSatNetworkProblemType_t networkProblem; /**<	Network problem during setup call */
+	TelSatCallCtrlProblemType_t permanentCallCtrlProblem; /**<	Permanent call control problem	*/
+	TelSatCallCtrlRequestedActionInfo_t callCtrlRequestedAction; /**< Call control requested action info */
+	TelSatResultInfo_t result2; /**< Additional response on general result */
+	TelSatTextTypeInfo_t text; /**<	Text string info */
+	int bIsTapiCause; /**< Flag to check whether tapi causes problems */
+	unsigned long tapiCause; /**< Tapi call level cause */
+	unsigned long tapiSsCause; /**< Tapi SS level cause */
 } TelSatSetupCallRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of SEND SS proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the SEND SS proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	int bOtherInfo; /**<	flag to check whether whether other information is required or not	*/
-	TelSatSsProblemType_t additionalSsProblemInfo; /**<	additional ss problem */
-	TelSatCallCtrlProblemType_t additionalCallCtrlProblemInfo; /**<	additional call control problem	*/
-	TelSatCallCtrlRequestedActionInfo_t callCtrlRequestedAction; /**<	call control requested action info	*/
-	TelSatResultInfo_t result2; /**<	additional response on general result	*/
-	TelSatTextTypeInfo_t text; /**<	text string info	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	int bOtherInfo; /**< Flag to check whether other information is required */
+	TelSatSsProblemType_t additionalSsProblemInfo; /**<	Additional SS problem */
+	TelSatCallCtrlProblemType_t additionalCallCtrlProblemInfo; /**<	Additional call control problem	*/
+	TelSatCallCtrlRequestedActionInfo_t callCtrlRequestedAction; /**< Call control requested action info */
+	TelSatResultInfo_t result2; /**< Additional response on general result */
+	TelSatTextTypeInfo_t text; /**< Text string info */
 } TelSatSendSsRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of SEND USSD proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the SEND USSD proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	int bOtherInfo; /**<	flag to check whether other information is required or not	*/
-	TelSatUssdProblemType_t additionalUssdProblemInfo; /**<	additional ussd problem	*/
-	TelSatCallCtrlProblemType_t additionalCallCtrlProblemInfo; /**<	additional call control problem	*/
-	int bCallCtrlHasModification; /**<	flag to check whether modification happens during call control	*/
-	TelSatTextTypeInfo_t text; /**<	text string info	*/
-	TelSatCallCtrlRequestedActionInfo_t callCtrlRequestedAction; /**<	call control requested action info	*/
-	TelSatResultInfo_t result2; /**<	additional response on general result	*/
-	TelSatTextTypeInfo_t text2; /**<	text string info	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	int bOtherInfo; /**< Flag to check whether other information is required */
+	TelSatUssdProblemType_t additionalUssdProblemInfo; /**<	Additional USSD problem	*/
+	TelSatCallCtrlProblemType_t additionalCallCtrlProblemInfo; /**<	Additional call control problem	*/
+	int bCallCtrlHasModification; /**< Flag to check whether modification happens during call control */
+	TelSatTextTypeInfo_t text; /**<	Text string info */
+	TelSatCallCtrlRequestedActionInfo_t callCtrlRequestedAction; /**< Call control requested action info */
+	TelSatResultInfo_t result2; /**< Additional response on general result */
+	TelSatTextTypeInfo_t text2; /**< Text string info */
 } TelSatSendUssdRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of REFRESH proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the REFRESH proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
 } TelSatRefreshRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of GET CHANNEL STATUS proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the GET CHANNEL STATUS proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	int bOtherInfo; /**<	flag whether other information are required or not	*/
-	TelSatBipProblemType_t additionalProblemInfo; /**<	bip specific problem info	*/
-	TelSatChannelStatusInfo_t channelStatus; /**<	channel Status	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	int bOtherInfo; /**< Flag to check whether other information is required */
+	TelSatBipProblemType_t additionalProblemInfo; /**< BIP specific problem info */
+	TelSatChannelStatusInfo_t channelStatus; /**< Channel Status */
 } TelSatGetChannelStatusRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of CLOSE CHANNEL proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the CLOSE CHANNEL proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	TelSatBipProblemType_t additionalProblemInfo; /**<	bip specific problem info	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	TelSatBipProblemType_t additionalProblemInfo; /**< BIP specific problem info */
 } TelSatCloseChannelRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of OPEN CHANNEL proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the OPEN CHANNEL proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	int bOtherInfo; /**<	flag whether other information are required or not */
-	TelSatBearerDescriptionInfo_t bearerDescription; /**<	bearerDescription	*/
-	TelSatBipProblemType_t additionalProblemInfo; /**<	bip specific problem info	*/
-	TelSatChannelStatusInfo_t channelStatus; /**<	channelStatus	*/
-	TelSatBufferSizeInfo_t bufferSize; /**<	bufferSize	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	int bOtherInfo; /**< Flag to check whether other information is required */
+	TelSatBearerDescriptionInfo_t bearerDescription; /**< Bearer description */
+	TelSatBipProblemType_t additionalProblemInfo; /**< BIP specific problem info */
+	TelSatChannelStatusInfo_t channelStatus; /**< Channel status */
+	TelSatBufferSizeInfo_t bufferSize; /**< Buffer size */
 } TelSatOpenChannelRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of LANGAUGE NOTIFICATION proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the LANGAUGE NOTIFICATION proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
 } TelSatLanguageNotificationRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of LAUNCH BROWSER proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the LAUNCH BROWSER proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	TelSatLaunchBrowserProblemType_t additionalProblemInfo; /**<	browser specific problem info	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	TelSatLaunchBrowserProblemType_t additionalProblemInfo; /**< Browser specific problem info */
 } TelSatLaunchBrowserRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of RECEIVE DATA proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the RECEIVE DATA proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	TelSatBipProblemType_t additionalProblemInfo; /**<	bip specific problem info	*/
-	int bOtherInfo; /**<	flag whether other information are required or not	*/
-	TelSatChannelDataInfo_t channel_data; /**<	channel data	*/
-	unsigned char channelDataLen; /**<	channel data length	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	TelSatBipProblemType_t additionalProblemInfo; /**< BIP specific problem info */
+	int bOtherInfo; /**< Flag to check whether other information is required */
+	TelSatChannelDataInfo_t channel_data; /**< Channel data	*/
+	unsigned char channelDataLen; /**< Channel data length */
 } TelSatReceiveDataRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of SEND DATA proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the SEND DATA proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
-	TelSatBipProblemType_t additionalProblemInfo; /**<	bip specific problem info	*/
-	unsigned char channelDataLen; /**<	channel data length	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
+	TelSatBipProblemType_t additionalProblemInfo; /**< BIP specific problem info */
+	unsigned char channelDataLen; /**< Channel data length */
 } TelSatSendDataRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of SETUP IDLE MODE TEXT proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the SETUP IDLE MODE TEXT proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
 } TelSatSetupIdlemodeTextRespInfo_t;
 
 /**
- * This structure contains the data objects for the Terminal Response of SEND DTMF proactive command.
+ * @brief The structure type containing the data objects for the Terminal Response of the SEND DTMF proactive command.
+ * @since_tizen 2.3
  */
 typedef struct {
-	TelSatResultInfo_t result; /**<	result whether current proactive command request was executed successfully or not	*/
+	TelSatResultInfo_t result; /**<	Result that indicates whether the current proactive command request is executed successfully */
 } TelSatSendDtmfRespInfo_t;
 
 /**
- * This contains the data structures to be used to send proactive command response.
+ * @brief The structure type containing the data structures to be used to send the proactive command response.
+ * @since_tizen 2.3
  */
 typedef struct {
-	unsigned char commandNumber; /**<	  proactive command number	*/
-	TelSatCommandType_t commandType; /**<	  proactive command type	*/
+	unsigned char commandNumber; /**< Proactive command number */
+	TelSatCommandType_t commandType; /**< Proactive command type */
 	union {
-		TelSatMoreTimeRespInfo_t moreTime;
-		TelSatDisplayTextRespInfo_t displayText; /**<	terminal response info from displayText proactive command	*/
-		TelSatGetInkeyRespInfo_t getInkey; /**<	terminal response info from getInkey proactive command	*/
-		TelSatGetInputRespInfo_t getInput; /**<	terminal response info from getInput proactive command	*/
-		TelSatPlayToneRespInfo_t playTone; /**<	terminal response info from playTone proactive command	*/
-		TelSatSetupMenuRespInfo_t setupMenu; /**<	terminal response info from setupMenu proactive command	*/
-		TelSatSelectItemRespInfo_t selectItem; /**<	terminal response info from selectItem proactive command	*/
-		TelSatSendSmsRespInfo_t sendSms; /**<	terminal response info from sendSms proactive command	*/
-		TelSatSendSsRespInfo_t sendSs; /**<	terminal response info from sendSs proactive command	*/
-		TelSatSendUssdRespInfo_t sendUssd; /**<	terminal response info from sendUssd proactive command	*/
-		TelSatSetupCallRespInfo_t setupCall; /**<	terminal response info from setupCall proactive command	*/
-		TelSatRefreshRespInfo_t refresh; /**<	terminal response info from refresh proactive command	*/
-		TelSatProvideLocalInfoRespInfo_t provideLocInfo; /**<	terminal response info from provide Local Info proactive command	*/
-		TelSatLaunchBrowserRespInfo_t launchBrowser; /**<	terminal response info from launch Browser proactive command	*/
-		TelSatSetupIdlemodeTextRespInfo_t idleText; /**<	terminal response info from setup idle mode text proactive command	*/
-		TelSatSendDtmfRespInfo_t sendDtmf; /**<	terminal response info from send Dtmf proactive command	*/
-		TelSatLanguageNotificationRespInfo_t languageNotification; /**<	terminal response info from language Notification proactive command	*/
-		TelSatSetupEventListRespInfo_t setupEventList; /**<	terminal response info from setup Event List proactive command	*/
-		TelSatOpenChannelRespInfo_t openChannel; /**<	terminal response info from openChannel proactive command	*/
-	} terminalRespInfo; /**<	Union	*/
+		TelSatMoreTimeRespInfo_t moreTime;	/**< TBD */
+		TelSatDisplayTextRespInfo_t displayText; /**< Terminal response info from the displayText proactive command	*/
+		TelSatGetInkeyRespInfo_t getInkey; /**<	Terminal response info from the getInkey proactive command */
+		TelSatGetInputRespInfo_t getInput; /**<	Terminal response info from the getInput proactive command */
+		TelSatPlayToneRespInfo_t playTone; /**<	Terminal response info from the playTone proactive command */
+		TelSatSetupMenuRespInfo_t setupMenu; /**< Terminal response info from the setupMenu proactive command */
+		TelSatSelectItemRespInfo_t selectItem; /**<	Terminal response info from the selectItem proactive command */
+		TelSatSendSmsRespInfo_t sendSms; /**< Terminal response info from the sendSms proactive command	*/
+		TelSatSendSsRespInfo_t sendSs; /**< Terminal response info from the sendSs proactive command */
+		TelSatSendUssdRespInfo_t sendUssd; /**< Terminal response info from the sendUssd proactive command */
+		TelSatSetupCallRespInfo_t setupCall; /**< Terminal response info from the setupCall proactive command */
+		TelSatRefreshRespInfo_t refresh; /**< Terminal response info from the refresh proactive command	*/
+		TelSatProvideLocalInfoRespInfo_t provideLocInfo; /**< Terminal response info from the provide Local Info proactive command */
+		TelSatLaunchBrowserRespInfo_t launchBrowser; /**< Terminal response info from the launch Browser proactive command */
+		TelSatSetupIdlemodeTextRespInfo_t idleText; /**< Terminal response info from the setup idle mode text proactive command	*/
+		TelSatSendDtmfRespInfo_t sendDtmf; /**<	Terminal response info from the send DTMF proactive command	*/
+		TelSatLanguageNotificationRespInfo_t languageNotification; /**<	Terminal response info from the language Notification proactive command	*/
+		TelSatSetupEventListRespInfo_t setupEventList; /**<	Terminal response info from the setup Event List proactive command */
+		TelSatOpenChannelRespInfo_t openChannel; /**< Terminal response info from the openChannel proactive command	*/
+	} terminalRespInfo; /**< Union */
 } TelSatRespInfo_t;
 
 /*
- *SAT Icon Data
+ * SAT Icon Data
  */
 
 typedef struct {
-	unsigned char iconId;
-	unsigned char imgType;
-	unsigned char imgLen;
-	unsigned char imgData[256];
+	unsigned char iconId;	/**< TBD */
+	unsigned char imgType;	/**< TBD */
+	unsigned char imgLen;	/**< TBD */
+	unsigned char imgData[256];	/**< TBD */
 } TelSatIconDataResp_t;
 
 typedef struct {
-	unsigned char iconId;
-	unsigned char imgType;
-	unsigned char fileId[2];
-	unsigned char reqDataLen[2];
-	unsigned char offset[2];
+	unsigned char iconId;	/**< TBD */
+	unsigned char imgType;	/**< TBD */
+	unsigned char fileId[2];	/**< TBD */
+	unsigned char reqDataLen[2];	/**< TBD */
+	unsigned char offset[2];	/**< TBD */
 } TelsatIconDataGet_t;
 
 #ifdef __cplusplus

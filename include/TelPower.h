@@ -1,7 +1,7 @@
 /*
  * libslp-tapi
  *
- * Copyright (c) 2011 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Contact: Ja-young Gu <jygu@samsung.com>
  *
@@ -19,64 +19,73 @@
  */
 
 /**
+ * @file TelPower.h
+ */
+
+/**
  * @internal
- * @ingroup		TelephonyAPI
- * @addtogroup	POWER_TAPI	POWER
+ * @addtogroup CAPI_TELEPHONY_SERVICE_MODEM
  * @{
- *
- * These APIs allow an application to accomplish the following services: @n
- * - Get current phone power status,  @n
- * - Reset the phone power (on / off), @n
- * - Get the Display Icon Information. @n
  */
 
 #ifndef _TEL_POWER_H_
 #define _TEL_POWER_H_
-
-#include <TelDefines.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * This defines the phone power reset commands.
+ * @brief Enumeration for the phone power reset commands.
+ * @since_tizen 2.3
  */
 typedef enum {
-	TAPI_PHONE_POWER_OFF = 0, TAPI_PHONE_POWER_ON, TAPI_PHONE_POWER_RESET,
+	TAPI_PHONE_POWER_ON = 0,
+	TAPI_PHONE_POWER_OFF,
+	TAPI_PHONE_POWER_RESET,
+	TAPI_PHONE_POWER_LOW,
+	TAPI_PHONE_POWER_MAX = TAPI_PHONE_POWER_LOW
 } tapi_power_phone_cmd_t;
 
 /**
- * This defines the phone power status values.
+ * @brief Enumeration for the phone power status values.
+ * @since_tizen 2.3
  */
 typedef enum {
-	TAPI_PHONE_POWER_STATUS_ON = 0, TAPI_PHONE_POWER_STATUS_OFF, TAPI_PHONE_POWER_STATUS_ERROR,
+	TAPI_PHONE_POWER_STATUS_UNKNOWN = -1,
+	TAPI_PHONE_POWER_STATUS_ON,
+	TAPI_PHONE_POWER_STATUS_OFF,
+	TAPI_PHONE_POWER_STATUS_RESET,
+	TAPI_PHONE_POWER_STATUS_LOW,
+	TAPI_PHONE_POWER_STATUS_ERROR
 } tapi_power_phone_power_status_t;
 
 /**
- * Use to Enter or Leave Flight Mode.
- *
+ * @details Enumeration for flight modes.
+ * @since_tizen 2.3
  */
 typedef enum {
 	TAPI_POWER_FLIGHT_MODE_ENTER = 0x01, /**< ONLINE OFF */
 	TAPI_POWER_FLIGHT_MODE_LEAVE, /**< ONLINE ON */
-	TAPI_POWER_FLIGHT_MODE_MAX
+	TAPI_POWER_FLIGHT_MODE_MAX		/**< TBD */
 } tapi_power_flight_mode_type_t;
 
 typedef enum {
 	TAPI_POWER_FLIGHT_MODE_RESP_ON = 0x01, /**< Flight Mode On Success */
 	TAPI_POWER_FLIGHT_MODE_RESP_OFF, /**< Flight Mode Off Success */
 	TAPI_POWER_FLIGHT_MODE_RESP_FAIL, /**< Flight Mode Request Fail */
-	TAPI_POWER_FLIGHT_MODE_RESP_MAX
+	TAPI_POWER_FLIGHT_MODE_RESP_MAX		/**< TBD */
 } tapi_power_flight_mode_resp_type_t;
 
 /**
- * This enum defines the phone battery status levels.
+ * @brief Enumeration for the phone battery status levels.
  *
+ * @details
  * 0x01 : Power Off Level                     => PhoneLevel = power off
  * 0x02 : Critical-Low Battery Level          => PhoneLevel = 0
  * 0x03 : Low Battery Level                   => PhoneLevel = 1
  * 0x04 : Normal Level                        => PhoneLevel = 2,3,4
+ * @since_tizen 2.3
  */
 typedef enum {
 	TAPI_POWER_BATT_STAT_POWER_OFF_LEVEL = 0x01, /**< Power Off Level */

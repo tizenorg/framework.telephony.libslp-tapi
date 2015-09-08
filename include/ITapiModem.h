@@ -1,7 +1,7 @@
 /*
  * libslp-tapi
  *
- * Copyright (c) 2011 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Contact: Ja-young Gu <jygu@samsung.com>
  *
@@ -19,474 +19,231 @@
  */
 
 /**
+ * @file ITapiModem.h
+ */
+
+/**
  * @internal
- * @ingroup		TelephonyAPI
- * @addtogroup	MODEM_TAPI	POWER
+ * @addtogroup CAPI_TELEPHONY_SERVICE_MODEM
  * @{
- *
- * These APIs allow an application to accomplish the following services: @n
- * - Process power command @n
- * - Reset the phone power (on / off), @n
- * - Process airplane mode @n
  */
 
 #ifndef _ITAPI_MODEM_H_
 #define _ITAPI_MODEM_H_
 
 #include <tapi_common.h>
-#include <TelDefines.h>
 #include <TelPower.h>
 #include <TelMisc.h>
-#include "ITapiPS.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
+ * @brief Turns the modem on/off.
+ * @details <b> Sync (or) Async: </b> This is a Synchronous API. \n
  *
- * @brief  This API is used to turn power off or on the modem.
+ *          <b> Prospective Clients: </b> External Apps. \n
  *
- * @par Sync (or) Async:
- * This is a Synchronous API.
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @par Important Notes:
- * -NONE
+ * @param[in] handle The handle from tel_init()
+ * @param[in] cmd The index value, which is the power command #tapi_power_phone_cmd_t
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @warning
- * - None.
- *
- *
- * @param [in] handle
- * - handle from tel_init()
- *
- * @param [in] cmd
- * - This index value is the power command as #tapi_power_phone_cmd_t.
- *
- * @param [in] callback
- *   - To register callback function for result of this function.
- *
- * @param [in] user_data
- *   - user data for user specification
- *
- * @par Async Response Message:
- * - None
- *
- *
- * @pre
- *  - None.
- *
- * @post
- *  - None.
- *
- * @return Return Type (int) \n
- * - TAPI_API_SUCCESS - indicating that the operation has completed successfully. \n
- * - Otherwise it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
- *
+ * @return The return type (int) \n
+ *         #TAPI_API_SUCCESS indicates that the operation is completed successfully,
+ *         else it provides an error code (Refer #TapiResult_t).
  */
 int tel_process_power_command(TapiHandle *handle, tapi_power_phone_cmd_t cmd, tapi_response_cb callback, void *user_data);
 
 /**
+ * @brief Switches the flight mode on/off.
  *
- * @brief  This API is used to enter or leave airplane mode
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API. \n
  *
- * @par Sync (or) Async:
- * This is a Asynchronous API.
+ *          <b> Prospective Clients: </b> External Apps.
  *
- * @par Important Notes:
- * -NONE
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @warning
- * - None.
+ * @param[in] handle The handle from tel_init()
  *
- *
- * @param [in] handle
- * - handle from tel_init()
- *
- * @param [in] mode
- * - This mode value is the flight flag #tapi_power_flight_mode_type_t.
- *
- * @param [in] callback
- *   - To register callback function for result of this function.
- *
- * @param [in] user_data
- *   - user data for user specification
- *
- * @par Async Response Message:
- * The event associated is TAPI_EVENT_MODEM_FLIGHT_MODE_RESP  and the event data is #tapi_power_flight_mode_resp_type_t.
- * Asynchronous return status is always TAPI_API_SUCCESS.
- *
- * @pre
- *  - None.
- *
- * @post
- *  - None.
- *
- * @return Return Type (int) \n
- * - TAPI_API_SUCCESS - indicating that the operation has completed successfully. \n
- * - Otherwise it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
- *
+ * @param[in] mode The mode value, which is the flight flag #tapi_power_flight_mode_type_t
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
+
+ * @return The return type (int) \n
+ *         #TAPI_API_SUCCESS indicates that the operation is completed successfully, \n
+ *         else it provides an error code (Refer #TapiResult_t).
  */
 int tel_set_flight_mode(TapiHandle *handle, tapi_power_flight_mode_type_t mode, tapi_response_cb callback, void *user_data);
 
+/**
+ * @brief Gets the flight mode
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/telephony
+ *
+ * @param[in] handle The handle from tel_init()
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
+ */
+int tel_get_flight_mode(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
 /**
+ * @brief Gets ME version information.
  *
- * @brief  This function is invoked to Get ME version information.
+ * @details <b> Sync (or) Async: </b> This is a Synchronous API.\n
  *
- * @par Sync (or) Async:
- * This is a synchronous API.
+ *          <b> Prospective Clients: </b> External Apps.\n
  *
- * @par Important Notes:
- * - None.
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/telephony
  *
- * @warning
- * - None.
+ * @param[in] handle The handle from tel_init()
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param [in] handle
- * - handle from tel_init()
- *
- * @param [in] callback
- *   - To register callback function for result of this function.
- *
- * @param [in] user_data
- *   - user data for user specification
- *
- * @par Async Response Message:
- * - NA
- *
- * @pre
- *  - None.
- *
- * @post
- *  - None.
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
+ * @return The return type (int) \n
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation is completed successfully \n
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
 int tel_get_misc_me_version(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
 /**
+ * @brief Gets the Misc ME version.
  *
- * @brief This function is to get misc me version
+ * @details <b> Sync (or) Async: </b> This is a Synchronous API.\n
  *
- * @par Sync (or) Async:
- * This is a Synchronous API.
+ *          <b> Prospective Clients: </b> External Apps.\n
  *
- * @par Important Notes:
- * - None.
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/telephony
  *
- * @warning
- * - None.
+ * @param[in] handle The handle from tel_init()
  *
- * @param [in] handle
- * - handle from tel_init()
- *
- * @par Async Response Message:
- * - Na
- *
- * @pre
- *  - None.
- *
- * @post
- *  - None.
- *
- * @return Return Type ( TelMiscVersionInformation * ) \n
- * - Misc Version Information
- *
- * @par Prospective Clients:
- * External Apps.
- *
+ * @return The return type ( TelMiscVersionInformation * ) \n
+ *         The Misc Version Information.
  */
-
-
 TelMiscVersionInformation *tel_get_misc_me_version_sync(TapiHandle *handle);
 
-
 /**
+ * @brief Gets the ME ESN/MEID for each phone type.
  *
- * @brief  This function is invoked to Get ME IMEI/ESN/MEID for each phone type.
+ * @details <b> Sync (or) Async: </b> This is a Synchronous API. \n
  *
- * @par Sync (or) Async:
- * This is a synchronous API.
+ *          <b> Prospective Clients: </b> External Apps. \n
  *
- * @par Important Notes:
- * - None.
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/telephony
  *
- * @warning
- * - None.
+ * @param[in] handle The handle from tel_init()
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param [in] handle
- * - handle from tel_init()
- *
- * @param [in] callback
- *   - To register callback function for result of this function.
- *
- * @param [in] user_data
- *   - user data for user specification
- *
- * @par Async Response Message:
- * - NA
- *
- * @pre
- *  - None.
- *
- * @post
- *  - None.
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
+ * @return The return type (int) \n
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation is completed successfully \n
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
 int tel_get_misc_me_sn(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
 /**
+ * @brief Gets the Misc ME Serial Number.
  *
- * @brief This function is to get misc me Sereal Number
+ * @details <b> Sync (or) Async: </b> This is a Synchronous API. \n
  *
- * This function makes Dbus method call to Telephony Sever and returns immediate value.
- * However it just means that the API request has been transfered to the CP successfully.
- * The actual operation result is being delivered in the corresponding event asynchronously.
+ *          <b> Prospective Clients: </b> Embedded call application. \n
  *
- * @par Sync (TapiHandle *handle, or) Async:
- * This is a Synchronous API.
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/telephony
  *
- * @par Important Notes:
- *  - None.
+ * @remarks This function makes a Dbus method call to the Telephony Server and returns an immediate value.
+ *          However it just means that the API request has been transfered to the CP successfully.
+ *          The actual operation result is delivered in the corresponding event asynchronously.
  *
- * @warning
- * 
+ * @param[in] handle The handle from tel_init()
  *
- * @param [in] handle
- * - handle from tel_init()
- *
- * @pre
- * - None.
- *
- * @post
- * - None.
- *
- * @return Return Type (char*) \n
- * - Sereal Number string
- *
- * @par Prospective Clients:
- * Embedded call application
- *
- * @see None.
- *
- * @remarks
- * - None
- *
- *
+ * @return The return Type (char*) \n
+ *         The Serial Number string.
  */
-
-char *tel_get_misc_me_sn_sync(TapiHandle *handle);
+TelMiscSNInformation *tel_get_misc_me_sn_sync(TapiHandle *handle);
 
 /**
+ * @brief Gets the Misc ME IMEI.
  *
- * @brief This function is to get misc me imei
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API.\n
  *
- * @par Sync (or) Async:
- * This is a Asynchronous API.
+ *          <b> Prospective Clients: </b> External Apps.
  *
- * @par Important Notes:
- * - None.
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/telephony
  *
- * @warning
- * - None.
+ * @param[in] handle The handle from tel_init()
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param [in] handle
- * - handle from tel_init()
- *
- * @param [in] callback
- *   - To register callback function for result of this function.
- *
- * @param [in] user_data
- *   - user data for user specification
- *
- * @par Async Response Message:
- * - IMEI
- *
- * @pre
- *  - None.
- *
- * @post
- *  - None.
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
+ * @return The return type (int) \n
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation is completed successfully \n
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
-
 int tel_get_misc_me_imei(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
 /**
+ * @brief Gets the Misc ME IMEI.
  *
- * @brief This function is to get misc me imei
+ * @details <b> Sync (or) Async: </b> This is a Synchronous API.\n
  *
- * This function makes Dbus method call to Telephony Sever and returns immediate value.
- * However it just means that the API request has been transfered to the CP successfully.
- * The actual operation result is being delivered in the corresponding event asynchronously.
+ *          <b> Prospective Clients: </b> Embedded call application.
  *
- * @par Sync (TapiHandle *handle, or) Async:
- * This is a Synchronous API.
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/telephony
  *
- * @par Important Notes:
- *  - None.
+ * @remarks This function makes a Dbus method call to the Telephony Server and returns an immediate value.
+ *          However it just means that the API request has been transfered to the CP successfully.
+ *          The actual operation result is delivered in the corresponding event asynchronously.
  *
- * @warning
- * 
+ * @param[in] handle The handle from tel_init()
  *
- * @param [in] handle
- * - handle from tel_init()
- *
- *
- * @pre
- * - None.
- *
- * @post
- * - None.
- *
- * @return Return Type (char*) \n
- * - IMEI string
- *
- * @par Prospective Clients:
- * Embedded call application
- *
- * @see None.
- *
- * @remarks
- * - None
- *
- *
+ * @return The return type (char*) \n
+ *         The IMEI string.
  */
-
 char *tel_get_misc_me_imei_sync(TapiHandle *handle);
 
 /**
+ * @brief Checks the modem power status.
  *
- * @brief This function is to check modem power status
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API. \n
  *
- * This function makes Dbus method call to Telephony Sever and returns immediate value.
- * However it just means that the API request has been transfered to the CP successfully.
- * The actual operation result is being delivered in the corresponding event asynchronously.
+ *          <b> Prospective Clients: </b> Embedded call application.
  *
- * @par Sync (TapiHandle *handle, or) Async:
- * This is a Asynchronous API.
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/telephony
  *
- * @par Important Notes:
- *  - None.
+ * @remarks This function makes a Dbus method call to the Telephony Server and returns an immediate value.
+ *          However it just means that the API request has been transfered to the CP successfully.
+ *          The actual operation result is delivered in the corresponding event asynchronously.
  *
- * @warning
+ * @param[in] handle The handle from tel_init()
+ * @param[out] result The result of checking the modem power status
  *
- *
- * @param [in] handle
- * - handle from tel_init()
- *
- * @param [out] result
- * - result of checking modem power status.
- *
- * @par Async Response Message:
- * - 
- *
- * @pre
- * - None.
- *
- * @post
- * - None.
- *
- * @return Return Type (TapiHandle *handle, int) \n
- * - 0 - indicating that the operation has completed successfully. \n
- * - Else it will return failure and error code (TapiHandle *handle, Refer Doxygen doc or #TapiResult_t)
- *
- * @par Prospective Clients:
- * Embedded call application
- *
- * @see None.
- *
- * @remarks
- * - None
- *
- *
+ * @return The return type (int) \n
+ *         @c 0 indicates that the operation is completed successfully, \n
+ *         else it will return failure and an error code (Refer Doxygen doc or #TapiResult_t).
  */
-
 int tel_check_modem_power_status(TapiHandle *handle, int *result);
-
-/**
- *
- * @brief This function is to control modem dun pin
- *
- * This function makes Dbus method call to Telephony Sever and returns immediate value.
- * However it just means that the API request has been transfered to the CP successfully.
- * The actual operation result is being delivered in the corresponding event asynchronously.
- *
- * @par Sync (TapiHandle *handle, or) Async:
- * This is a Asynchronous API.
- *
- * @par Important Notes:
- *  - None.
- *
- * @warning
- *
- *
- * @param [in] handle
- * - handle from tel_init()
- *
- * @param [in] pincontrol
- * - pin control inforamation
- *
- * @param [in] callback
- * - To register callback function for result of this function.
- *
- * @param [in] user_data
- * - user data for user specification
- *
- * @par Async Response Message:
- * - None.
- *
- * @pre
- * - None.
- *
- * @post
- * - None.
- *
- * @return Return Type (TapiHandle *handle, int) \n
- * - 0 - indicating that the operation has completed successfully. \n
- * - Else it will return failure and error code (TapiHandle *handle, Refer Doxygen doc or #TapiResult_t)
- *
- * @par Prospective Clients:
- * Embedded call application
- *
- * @see None.
- *
- * @remarks
- * - None
- *
- *
- */
-
-int tel_control_modem_dun_pin_ctrl(TapiHandle *handle, tapi_ps_btdun_pincontrol *pincontrol, tapi_response_cb callback, void *user_data);
 
 #ifdef __cplusplus
 }

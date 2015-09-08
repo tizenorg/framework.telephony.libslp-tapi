@@ -1,7 +1,7 @@
 /*
  * libslp-tapi
  *
- * Copyright (c) 2011 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Contact: Ja-young Gu <jygu@samsung.com>
  *
@@ -19,15 +19,13 @@
  */
 
 /**
-* @open
-* @ingroup		TelephonyAPI
-* @addtogroup	SAT_TAPI	SAT
-* @{
-*
-* @file TelSatEnvelope.h
+ * @file TelSatEnvelope.h
+ */
 
-     @brief This file serves as a "C" header file defines structures for Tapi Sat envelope command Services. \n
-      It contains a sample set of constants, enums, structs that would be required by applications.
+/**
+ * @internal
+ * @addtogroup CAPI_TELEPHONY_SERVICE_SAT
+ * @{
  */
 
 #ifndef _TEL_SAT_ENVELOPE_H_
@@ -41,177 +39,189 @@ extern "C"
 #endif
 
 /**
- * @enum TelSatCallType_t
- * This enum indicates the SAT call type
+ * @brief Enumeration for the SAT call type.
+ * @since_tizen 2.3
  */
 typedef enum
 {
-	TAPI_SAT_CALL_TYPE_MO_VOICE = 0X00,	/**<	call type -  mo voice	*/
-	TAPI_SAT_CALL_TYPE_MO_SMS,			/**<	call type - mo sms	*/
-	TAPI_SAT_CALL_TYPE_SS,				/**<	call type -  ss	*/
-	TAPI_SAT_CALL_TYPE_USSD,			/**<	call type -  ussd	*/
-	TAPI_SAT_PDP_CNTXT_ACT,				/**<	call type -  pdp context action	*/
-	TAPI_SAT_CALL_TYPE_MAX				/**<	call type -  max	*/
+	TAPI_SAT_CALL_TYPE_MO_VOICE = 0X00,	/**< Call type - MO voice */
+	TAPI_SAT_CALL_TYPE_MO_SMS,			/**< Call type - MO SMS */
+	TAPI_SAT_CALL_TYPE_SS,				/**< Call type - SS */
+	TAPI_SAT_CALL_TYPE_USSD,			/**< Call type - USSD */
+	TAPI_SAT_PDP_CNTXT_ACT,				/**< Call type - PDP context action */
+	TAPI_SAT_CALL_TYPE_MAX				/**< Call type - max */
 }TelSatCallType_t;
 
 /**
- * @enum TelSatCallCtrlResultType_t
- * This enum indicates the result of call control by SIM.
+ * @brief Enumeration for the result of call control by SIM.
+ * @since_tizen 2.3
  */
 typedef enum
 {
-	TAPI_SAT_CALL_CTRL_R_ALLOWED_NO_MOD			= 0,		/**<	call control result type -  ALLOWED WITH NO MOD	*/
-	TAPI_SAT_CALL_CTRL_R_NOT_ALLOWED			= 1,		/**<	call control result type -  NOT ALLOWED	*/
-	TAPI_SAT_CALL_CTRL_R_ALLOWED_WITH_MOD		= 2,		/**<	call control result type -  ALLOWED WITH MOD	*/
-	TAPI_SAT_CALL_CTRL_R_RESERVED				= 0xFF		/**<	call control result type -  RESERVED	*/
+	TAPI_SAT_CALL_CTRL_R_ALLOWED_NO_MOD			= 0,		/**< Call control result type -  ALLOWED WITH NO MOD */
+	TAPI_SAT_CALL_CTRL_R_NOT_ALLOWED			= 1,		/**< Call control result type -  NOT ALLOWED */
+	TAPI_SAT_CALL_CTRL_R_ALLOWED_WITH_MOD		= 2,		/**< Call control result type -  ALLOWED WITH MOD */
+	TAPI_SAT_CALL_CTRL_R_RESERVED				= 0xFF		/**< Call control result type -  RESERVED */
 
 } TelSatCallCtrlResultType_t;
 
 /**
- * @enum TelSatEnvelopeResp_t
- * This enum indicates the general result of sending an envelope command to USIM.
+ * @brief Enumeration for the general result of sending an envelope command to the USIM.
+ * @since_tizen 2.3
  */
 typedef enum
 {
-	TAPI_SAT_ENVELOPE_SUCCESS,	/**<	envelope result - success	*/
-	TAPI_SAT_ENVELOPE_SIM_BUSY,	/**<	envelope result - USIM busy	*/
-	TAPI_SAT_ENVELOPE_FAILED	/**<	envelope result - failed	*/
+	TAPI_SAT_ENVELOPE_SUCCESS,	/**< Envelope result - success */
+	TAPI_SAT_ENVELOPE_SIM_BUSY,	/**< Envelope result - USIM busy */
+	TAPI_SAT_ENVELOPE_FAILED	/**< Envelope result - failed */
 
 }TelSatEnvelopeResp_t;
 
 //	8.	MENU SELECTION
 /**
- * This structure contains the data objects for MENU SELECTION envelope.
+ * @brief The structure type containing data objects for the MENU SELECTION envelope.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	unsigned char		itemIdentifier;		/**<	menu selection item identifier	*/
-	int				bIsHelpRequested;	/**<	flag to check whether help information required or not	*/
+	unsigned char		itemIdentifier;		/**< Menu selection item identifier	*/
+	int				bIsHelpRequested;	/**< Flag to check whether help information is required */
 } TelSatMenuSelectionReqInfo_t;
 
 //	9.1 CALL CONTROL BY SIM
 /**
- * This struct contains the data objects for Call Control result data sent by USIM.
+ * @brief Structure type containing data objects for Call Control result data sent by the USIM.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	TelSatAddressInfo_t				address;			/**<	call number	*/
-	TelSatSubAddressInfo_t			subAddress;			/**<	call number sub address	*/
-	TelSatBcRepeatIndicatorType_t	bcRepeatIndicator;	/**<	bc repeat indicator */
-	TelSatCapaConfigParamInfo_t		ccp1;				/**<	capability configuration parameter1	*/
-	TelSatCapaConfigParamInfo_t		ccp2;				/**<	capability configuration parameter2	*/
+	TelSatAddressInfo_t				address;			/**< Call number */
+	TelSatSubAddressInfo_t			subAddress;			/**< Call number sub address */
+	TelSatBcRepeatIndicatorType_t	bcRepeatIndicator;	/**< BC repeat indicator */
+	TelSatCapaConfigParamInfo_t		ccp1;				/**< Capability configuration parameter 1 */
+	TelSatCapaConfigParamInfo_t		ccp2;				/**< Capability configuration parameter 2 */
 }TelSatVoiceCallCtrlIndInfo_t;
 
 /**
- * This struct contains SAT ss control result data sent by USIM.
+ * @brief The structure type containing SAT SS control result data sent by the USIM.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	TelSatSsStringInfo_t			ssString;			/**<	ss number	*/
-	TelSatSubAddressInfo_t			subAddress;			/**<	ss sub address */
-	TelSatBcRepeatIndicatorType_t	bcRepeatIndicator;	/**<	bc repeat indicator	*/
-	TelSatCapaConfigParamInfo_t		ccp1;				/**<	capability configuration parameter1	*/
-	TelSatCapaConfigParamInfo_t		ccp2;				/**<	capability configuration parameter2	*/
+	TelSatSsStringInfo_t			ssString;			/**< SS number */
+	TelSatSubAddressInfo_t			subAddress;			/**< SS sub address */
+	TelSatBcRepeatIndicatorType_t	bcRepeatIndicator;	/**< BC repeat indicator */
+	TelSatCapaConfigParamInfo_t		ccp1;				/**< Capability configuration parameter 1 */
+	TelSatCapaConfigParamInfo_t		ccp2;				/**< Capability configuration parameter 2 */
 }TelSatSsCtrlIndInfo_t;
 
 /**
- * This struct contains SAT mo SMS control configuration data
+ * @brief The structure type containing SAT MO SMS control configuration data.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	TelSatAddressInfo_t		rpDestAddress;	/**<	sms control rp destination address	*/
-	TelSatAddressInfo_t		tpDestAddress;	/**<	sms control tp destination address	*/
+	TelSatAddressInfo_t		rpDestAddress;	/**< SMS control RP destination address	*/
+	TelSatAddressInfo_t		tpDestAddress;	/**< SMS control TP destination address	*/
 } TelSatMoSmsCtrlIndInfo_t;
 
 /**
- * This struct contains SAT call control configuration data
+ * @brief The structure type containing SAT call control configuration data.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	TelSatCallType_t					callType;		/**<	call type	*/
-	TelSatCallCtrlResultType_t			callCtrlResult;	/**<	call control result	*/
-	TelSatAlphaIdentifierInfo_t			alphaIdentifier;/**<	alpha identifier	*/
-	unsigned char						callId;			/**<	call id	*/
-	TelSatCallType_t					oldCallType;	/**<	old call type	*/
+	TelSatCallType_t					callType;		/**< Call type */
+	TelSatCallCtrlResultType_t			callCtrlResult;	/**< Call control result */
+	TelSatAlphaIdentifierInfo_t			alphaIdentifier;/**< Alpha identifier */
+	unsigned char						callId;			/**< Call ID */
+	TelSatCallType_t					oldCallType;	/**< Old call type */
 	union
 	{
-		TelSatVoiceCallCtrlIndInfo_t	voiceCallData;	/**<	voice call control data	*/
-		TelSatSsCtrlIndInfo_t			ssData;			/**<	ss control data	*/
+		TelSatVoiceCallCtrlIndInfo_t	voiceCallData;	/**< Voice call control data */
+		TelSatSsCtrlIndInfo_t			ssData;			/**< SS control data */
 		TelSatMoSmsCtrlIndInfo_t		smsData;
-	}u;													/**<	Union		*/
+	}u;													/**< Union */
 } TelSatCallCtrlIndInfo_t;
 
 //	9.2 MO SHORT MESSAGE CONTROL BY SIM RESULT
 /**
- * This struct contains SAT mo ss control request data
+ * @brief The structure type containing SAT MO SS control request data.
+ * @since_tizen 2.3
  */
  typedef struct
 {
-	TelSatCallCtrlResultType_t		callCtrlResult;		/**<	call control result	*/
-	TelSatAlphaIdentifierInfo_t		alphaIdentifier;	/**<	alpha identifier	*/
-	TelSatMoSmsCtrlIndInfo_t		smsData;			/**<	sms control data	*/
+	TelSatCallCtrlResultType_t		callCtrlResult;		/**< Call control result */
+	TelSatAlphaIdentifierInfo_t		alphaIdentifier;	/**< Alpha identifier */
+	TelSatMoSmsCtrlIndInfo_t		smsData;			/**< SMS control data */
 }TelSatMoSMCtrlResult_t;
 
 //	11.5 EVENT DOWNLOAD - USER ACTIVITY EVENT
 /**
- * This struct contains SAT user activity event request data
+ * @brief The structure type containing SAT user activity event request data.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	TelSatEventListInfo_t				eventList;			/**<	event List	*/
-	TelSatDeviceIdentitiesInfo_t		deviceIdentities;	/**<	device identities info	*/
+	TelSatEventListInfo_t				eventList;			/**< Event List	*/
+	TelSatDeviceIdentitiesInfo_t		deviceIdentities;	/**< Device identities info	*/
 
 } TelSatUserActivityEventReqInfo_t;
 
 //	11.6 EVENT DOWNLOAD - IDLE SCREEN AVAILABLE EVENT
 /**
- * This structure contains the data objects for IDLE SCREEN AVAILABLE event download.
+ * @brief The structure type containing the data objects for the IDLE SCREEN AVAILABLE event download.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	TelSatEventDownloadType_t	eventData;	/**<	event type	*/
+	TelSatEventDownloadType_t	eventData;	/**< Event type	*/
 } TelSatIdleScreenAvailableEventReqInfo_t;
 
 //	11.8 EVENT DOWNLOAD - LANGUAGE SELECTION EVENT
 /**
- * This structure contains the data objects for LANGUAGE SELECTION event download.
+ * @brief The structure type containing the data objects for the LANGUAGE SELECTION event download.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	TelSatLanguageType_t	 language;		/**<	selected language info	*/
+	TelSatLanguageType_t	 language;		/**< Selected language info	*/
 } TelSatLanguageSelectionEventReqInfo_t;
 
 //	11.9 EVENT DOWNLOAD - BROWSER TERMINATION EVENT
 /**
- * This structure contains the data objects for BROWSER TERMINATION event download.
+ * @brief The structure type containing the data objects for the BROWSER TERMINATION event download.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	TelSatBrowserTerminationCauseType_t		browserTerminationCause;	/**<	browser Termination Cause	*/
+	TelSatBrowserTerminationCauseType_t		browserTerminationCause;	/**< Browser Termination Cause */
 } TelSatBrowserTerminationEventReqInfo_t;
 
 //	11.10 EVENT DOWNLOAD - DATA AVAILABLE EVENT
 /**
- * This struct contains SAT data available event request data
+ * @brief The structure type containing SAT data available event request data.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	TelSatEventListInfo_t			eventList;			/**<	event List	*/
-	TelSatDeviceIdentitiesInfo_t	deviceIdentities;	/**<	device identities info	*/
-	TelSatChannelStatusInfo_t		channelStatus;		/**<	channel status	*/
-	TelSatChannelDataLengthInfo_t	channelDataLen;		/**<	channel data length	*/
+	TelSatEventListInfo_t			eventList;			/**< Event List	*/
+	TelSatDeviceIdentitiesInfo_t	deviceIdentities;	/**< Device identities info	*/
+	TelSatChannelStatusInfo_t		channelStatus;		/**< Channel status	*/
+	TelSatChannelDataLengthInfo_t	channelDataLen;		/**< Channel data length */
 
 } TelSatDataAvailableEventReqInfo_t;
 
 //	11.11 EVENT DOWNLOAD - CHANNEL STATUS EVENT
 /**
- * This struct contains SAT channel status even request data
+ * @brief The structure type containing SAT channel status even request data.
+ * @since_tizen 2.3
  */
 typedef struct
 {
-	TelSatEventListInfo_t			eventList;			/**<	event list	*/
-	TelSatDeviceIdentitiesInfo_t	deviceIdentities;	/**<	device identities info	*/
-	TelSatChannelStatusInfo_t		channelStatus;		/**<	channel Status	*/
+	TelSatEventListInfo_t			eventList;			/**< Event list	*/
+	TelSatDeviceIdentitiesInfo_t	deviceIdentities;	/**< Device identities info	*/
+	TelSatChannelStatusInfo_t		channelStatus;		/**< Channel Status	*/
 } TelSatChannelStatusEventReqInfo_t;
 
 #ifdef __cplusplus

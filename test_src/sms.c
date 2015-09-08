@@ -1,0 +1,1731 @@
+/*
+ * libslp-tapi
+ *
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd. All rights reserved.
+ *
+ * Contact: Ja-young Gu <jygu@samsung.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <glib.h>
+
+#include <tapi_common.h>
+#include <TelSms.h>
+#include <TapiUtility.h>
+#include <ITapiNetText.h>
+
+#include "menu.h"
+#include "sms.h"
+#include "sms_util.h"
+
+// Global Variabl
+int dcs_pos = 0;
+unsigned int SmsMsgId = 0;
+unsigned char tp_mr = 0x00;
+
+const char *cmdString[] = { "TAPI_SERVICE_SMS_SEND_UMTS_MSG",
+		"TAPI_SERVICE_SMS_READ_MSG", "TAPI_SERVICE_SMS_SAVE_MSG",
+		"TAPI_SERVICE_SMS_DELETE_MSG", "TAPI_SERVICE_SMS_GET_COUNT",
+		"TAPI_SERVICE_SMS_GET_SCA", "TAPI_SERVICE_SMS_SET_SCA",
+		"TAPI_SERVICE_SMS_GET_CB_CONFIG", "TAPI_SERVICE_SMS_SET_CB_CONFIG",
+		"TAPI_SERVICE_SMS_SET_MEM_STATUS", "TAPI_SERVICE_SMS_GET_PREF_BEARER",
+		"TAPI_SERVICE_SMS_SET_PREF_BEARER",
+		"TAPI_SERVICE_SMS_SET_DELIVERY_REPORT",
+		"TAPI_SERVICE_SMS_SET_MSG_STATUS", "TAPI_SERVICE_SMS_GET_PARAMS",
+		"TAPI_SERVICE_SMS_SET_PARAMS", "TAPI_SERVICE_SMS_GET_PARAMCNT",
+		"TAPI_SERVICE_SMS_SEND_CDMA_MSG" };
+
+static void on_resp_send_msg (TapiHandle *handle, int result, void *data,
+		void *user_data);
+static void on_resp_read_msg (TapiHandle *handle, int result, void *data,
+		void *user_data);
+static void on_resp_save_msg (TapiHandle *handle, int result, void *data,
+		void *user_data);
+static void on_resp_DeliverReport_msg (TapiHandle *handle, int result,
+		void *data, void *user_data);
+int  _util_hexstring_to_asciistring(const unsigned char *hex_string, unsigned char *ascii_string,int hex_len);
+
+unsigned int SmsUtilEncodeSca(TelSmsAddressInfo_t *sca, unsigned char *sca_num);
+
+int  _util_hexstring_to_asciistring(const unsigned char *hex_string, unsigned char *ascii_string,int hex_len)
+{
+	int i,ascii_len;
+
+	if(hex_string[hex_len-1]>>4 == 0x0f ) {
+		ascii_len = (hex_len * 2 ) -1;
+	}else {
+		ascii_len = (hex_len * 2 );
+	}
+
+	for (i =0; i < ascii_len; i++ ) {
+		if (i % 2 == 0) {
+			ascii_string[i]= (hex_string[i/2] & 0x0f)+ '0';
+		}else{
+			ascii_string[i]=((hex_string[i/2]   >> 4 ))+ '0';
+		}
+	}
+	ascii_string[ascii_len]='\0';
+	return ascii_len;
+}
+
+unsigned int SmsUtilEncodeSca(TelSmsAddressInfo_t *sca, unsigned char *sca_num)
+{
+	unsigned int sca_length = 0;
+	unsigned int additional_len = 0;
+	unsigned local_index, j;
+
+	sca->Npi = TAPI_SIM_NPI_ISDN_TEL;
+	sca->Ton = TAPI_SIM_TON_UNKNOWN;
+	if (sca_num[0] == '+') {
+		sca->Ton = TAPI_SIM_TON_INTERNATIONAL;
+	 	additional_len = 1;
+	}
+	sca_length = strlen((char *)sca_num) - additional_len;
+	if (sca_length % 2 == 0) {
+		for (local_index = additional_len, j = 0; local_index < sca_length; local_index += 2, j++)
+			sca->szDiallingNum[j] = ((sca_num[local_index+1] & 0X0F) << 4) | (sca_num[local_index] & 0x0F);
+	} else {
+		for (local_index = additional_len, j = 0; local_index < sca_length; local_index += 2, j++) {
+			if (local_index == (sca_length - 1))
+	    			sca->szDiallingNum[j] = ((0xF0) | (sca_num[local_index] & 0x0F));
+			else
+				sca->szDiallingNum[j] = ((sca_num[local_index+1] & 0X0F) << 4) | (sca_num[local_index] & 0x0F);
+		}
+	}
+	sca->szDiallingNum[(sca_length+1)/2] = '\0';
+	sca->DialNumLen = (sca_length+1)/2;
+
+	return sca->DialNumLen;
+}
+
+
+static BOOL EncodeCdmaSmsSubmitTpdu (char* diallingNum, int dialNumLen,
+		char* msgTxt, int msg_len)
+{
+	return TRUE;
+}
+
+static BOOL DecodeCellBroadcastMsg (int length, char * pPDU)
+{
+	int msgLength;
+	int sn = 0; //serial number
+	int msgID; //message identifier
+	Sms_coding_scheme dcs;
+
+	unsigned char page[2];
+	int contents_length;
+	char contents[SMS_CB_SIZE_MAX];
+
+	unsigned char gs;
+	unsigned char msgCode;
+	unsigned char updateNumber;
+
+	if (pPDU == NULL ) {
+		msg("pData is Null")
+		return FALSE;
+	}
+
+	msg("cb msg type is %x", pPDU[0]);
+	msg("cb msg len is %x", pPDU[1]);
+
+	msg("$$$$$$$$$$$$$$$length of cb msg is %d", length);
+	sn = (pPDU[2] << 8) | pPDU[1];
+
+	gs = (pPDU[2] & 0xC0) >> 6;  //bit 7, bit 6
+
+	msgCode = ( ( (pPDU[2] & 0x3F) << 4) | pPDU[3]) & 0xF0;
+
+	updateNumber = pPDU[3] & 0x0F;  //bit3, bit2, bit1, bit0
+
+	msgID = pPDU[4] << 4 | pPDU[3];
+
+	SmsUtilDecodeDCS (&dcs, pPDU[6]);
+
+	page[0] = pPDU[7] & 0x0F; //total page
+	page[1] = (pPDU[7] & 0xF0) >> 4; //current page
+
+	msgLength = length - 2;
+
+	contents_length = msgLength - 6;
+
+	if (dcs.alphabet_type == SMS_ALPHABET_DEFAULT) {
+		unsigned char inData[SMS_CB_SIZE_MAX + 1];
+
+		memset (inData, 0x00, SMS_CB_SIZE_MAX + 1);
+
+		memcpy ((void*) inData, (void*) &pPDU[8], contents_length);
+		SmsUtilUnpackGSMCode (contents, &pPDU[8], msgLength);
+	}
+	else {
+		memcpy (contents, &pPDU[8], msgLength);
+		contents[msgLength] = 0;
+	}
+
+	printf ("*************************************\n");
+	printf ("serical number : 0x%04x \n", sn);
+	printf ("Geographical Scope: 0x%x\n", gs);
+	printf ("message code : 0x%x\n", msgCode);
+	printf ("update Number : 0x%x\n", updateNumber);
+	printf ("message identifier :  0x%x\n", msgID);
+	printf ("DCS-Commpressed?: %d (1: true)\n", dcs.bCompressed);
+	printf ("DCS-coding_group_type:  %x\n", dcs.coding_group_type);
+	printf ("contents bytes size : %d\n", contents_length);
+	printf ("page : (%d /%d) (page /total ) \n", page[1], page[0]);
+	printf ("contents: %s\n", contents);
+	printf ("*************************************\n");
+
+	return TRUE;
+}
+
+static BOOL EncodeSmsSubmitTpdu (MManager *mm, char* diallingNum,
+		int dialNumLen, char* msg, int msg_len)
+{
+	TapiHandle *handle = menu_manager_ref_user_data (mm);
+
+	TPDU_SMS_SUBMIT tpdu_submit;
+
+	unsigned char packet[TAPI_NETTEXT_MSG_SIZE_MAX];
+
+	unsigned char SCA[TAPI_NETTEXT_SCADDRESS_LEN_MAX + 1];
+	int ret = 0;
+	unsigned char tp_pid = 0; //reaplace type (65)
+	unsigned char tp_dcs; //=17; //class_1(17),class_2(18)
+	unsigned char tp_vp;
+
+	int local_index = 0, ScIndex = 0;
+	int i;
+	int requestId = 0;
+	unsigned char sca_len = 0;
+	TapiResult_t returnStatus;
+
+	TelSmsDatapackageInfo_t *pDataPackage = NULL;
+
+	tp_mr++;
+
+	memset (packet, 0, TAPI_NETTEXT_MSG_SIZE_MAX);
+
+	/************SCA ADDRESS GET START**************/
+	/*
+	 returnStatus = TelTapiSmsGetSCA(&sc_addr,0);
+	 printf("Service center addr returned from TAPI SCA address %s returnStatus %d\n",sc_addr.szDiallingNum,returnStatus);
+	 SmsUtilDecodeAddrField(decodeScaAddr, &sc_addr.szDiallingNum[0],&sc_addr.Ton, &sc_addr.Npi);
+	 sca_len = strlen( decodeScaAddr );
+
+	 memcpy( SCA, decodeScaAddr, sca_len);
+	 SCA[sca_len] = '\0';
+	 */
+	msg("Enter SCA: ");
+	memset (SCA, 0, sizeof (SCA));
+
+	ret = read (0, SCA, sizeof (SCA) - 1);
+	if (ret <= 0) {
+		msg(" NULL msg can NOT be sent ");
+		return -1;
+	}
+	SCA[ret] = '\0';
+
+	pDataPackage = malloc (sizeof(TelSmsDatapackageInfo_t));
+	if (!pDataPackage)
+		return -1;
+
+	memset (pDataPackage, 0, sizeof(TelSmsDatapackageInfo_t));
+
+	sca_len = strlen ((char *) SCA) - 1;
+
+	msg("Decode SCA Address =========");
+	msg("SCA Number :%s, SCA Length :%d ", SCA, sca_len);
+	msg("========================");
+
+	//SCA ADDRESS GET END
+
+	//SCA
+
+	//TODO : SCA
+
+	ScIndex = SmsUtilEncodeAddrField ((unsigned char*) pDataPackage->Sca,
+			(char *) SCA, sca_len, 0x01, 0x01);
+
+	msg("ScIndex is %d", ScIndex);
+
+	// TP-MTI, TP-RD, TP-VPF, TP-SRR, TP_UDHI, TP-RP
+	tpdu_submit.msg_type = SMS_TPDU_SUBMIT;
+	tpdu_submit.rd = FALSE; //false :accept duplicate msg , true: reject duplicate msg
+	tpdu_submit.vpf = SMS_VP_RELATIVE;
+	tpdu_submit.srr = FALSE; //false :A status report is not requested , true: A status report is requested
+	tpdu_submit.udhi = FALSE; //false: contains only the short message , true :a Header in addition to the short message
+	tpdu_submit.rp = FALSE; //false :TP Reply Path parameter is not set in this SMS SUBMIT, true : TP Reply Path parameter is set in this SMS SUBMIT
+
+	packet[local_index] = tpdu_submit.msg_type;					// SUBMIT: bits 0, 1
+	packet[local_index] |= tpdu_submit.rd ? 0x04 : 0;						// bit 2
+	packet[local_index] |= tpdu_submit.vpf << 3;	// bits 3, 4
+	packet[local_index] |= tpdu_submit.srr ? 0x20 : 0;						// bit 5
+	packet[local_index] |= tpdu_submit.udhi ? 0x40 : 0;						// bit 6
+	packet[local_index] |= tpdu_submit.rp ? 0x80 : 0;						// bit 7
+
+	local_index++;
+	msg("local_index of message ref is %d, msgref is %d", local_index, tp_mr);
+	/* TP-MR */
+	packet[local_index++] = tp_mr;
+
+	// TP-DA
+	local_index += SmsUtilEncodeAddrField (packet + local_index, diallingNum, dialNumLen, 0x01, 0x01);
+
+	//msg("DESTINATTION  ADDR Encoded =========");
+
+	//TP-PID
+	packet[local_index++] = tp_pid;
+
+	// TP_DCS (Data Coding Scheme)
+
+	tpdu_submit.dcs.bCompressed = FALSE;
+	tpdu_submit.dcs.bmsg_class_set = TRUE;
+	tpdu_submit.dcs.coding_group_type = SMS_CODGRP_SM_GENERAL_DCS;
+	tpdu_submit.dcs.alphabet_type = SMS_ALPHABET_DEFAULT;
+	tpdu_submit.dcs.class_type = SMS_CLASS_2;
+
+	SmsUtilEncodeDCS (&tp_dcs, &tpdu_submit.dcs);
+
+	packet[local_index++] = tp_dcs;
+
+	//msg("DCS Encoded:tp_dcs =%d =========",tp_dcs);
+
+	//TP-VP
+
+	tpdu_submit.vp.vp_rel_type = SMS_VP_REL_6H;
+	tpdu_submit.vp.vp_type = SMS_VP_RELATIVE;
+	tpdu_submit.vp.vpValue = 0xff;
+
+	SmsUtilEncodeValidity (&tp_vp, &tpdu_submit.vp);
+
+	//tp_vp =65;
+	packet[local_index++] = tp_vp;
+	//msg("Validity Encoded :tp_vp =%d =========",tp_vp);
+
+	// UDL
+	packet[local_index++] = msg_len;
+
+	// TP-UD
+
+	if (tpdu_submit.dcs.alphabet_type == SMS_ALPHABET_DEFAULT) {
+		int pos;
+		pos = SmsUtilPackGSMCode (packet + local_index, msg, msg_len);
+		local_index += pos;
+	}
+
+	msg("Send packet to phonseSever[%d] -----", local_index);
+
+	for (i = 0; i < local_index; i++) {
+		msg("[%02x]", packet[i]);
+		if (i % 10 == 9)
+			msg("\n");
+	}
+	msg("\n");
+
+	memcpy (pDataPackage->szData, packet, local_index);
+	pDataPackage->MsgLength = local_index;
+
+	msg("***Sending the Message (Api:SendMsg)***");
+
+	msg("Length : %d", pDataPackage->MsgLength);
+
+	returnStatus = tel_send_sms (handle, pDataPackage, 0, on_resp_send_msg,
+			NULL );
+
+	msg("SendMsg : returnStatus=%d requestId=%d", returnStatus, requestId);
+
+	free (pDataPackage);
+
+	return TRUE;
+
+}
+
+
+static int DecodeSmsDeliverTpdu (int tpdu_len, char* pTPDU)
+{
+	TPDU_SMS_DELIVER tpdu_deliver;
+	TmDateTime SCTimeStamp;
+	int orgAddr_len = 0;
+	char diallingNum[SMS_ADDRESS_LEN_MAX + 1];
+	char orgAddr[SMS_ADDRESS_LEN_MAX + 1]; //originating number
+	int org_ton, org_npi;
+	int position = 0;
+
+	/* TP-MTI, TP-MMS, TP-SRI, TP_UDHI, TP-RP */
+	tpdu_deliver.msg_type = SMS_TPDU_DELIVER;
+	tpdu_deliver.mms = (pTPDU[position] & 0x04) ? TRUE : FALSE; // bit 2 (Message Type Indicator)
+	tpdu_deliver.sri = (pTPDU[position] & 0x20) ? TRUE : FALSE;	// bit 5 (Status Report Indication)
+	tpdu_deliver.udhi = (pTPDU[position] & 0x40) ? TRUE : FALSE;// bit 6 (User Data Header Indicator)
+	tpdu_deliver.rp = (pTPDU[position] & 0x80) ? TRUE : FALSE;// bit 7 (Reply Path)
+
+	position++;
+
+	/* TP-OA */
+
+	memset (diallingNum, 0, sizeof (diallingNum));
+
+	orgAddr_len = SmsUtilDecodeAddrField (diallingNum, &pTPDU[position],
+			&org_ton, &org_npi);
+	if (orgAddr_len > SMS_ADDRESS_LEN_MAX - 1)
+		orgAddr_len = SMS_ADDRESS_LEN_MAX - 1;
+
+	position += 2;
+
+	if (orgAddr_len % 2)
+		position += orgAddr_len / 2 + 1;
+	else
+		position += orgAddr_len / 2;
+
+	msg("pos = %d, length = %d", position, orgAddr_len);
+
+	if (org_ton == SMS_TON_INTERNATIONAL) {
+		orgAddr[0] = '+';
+		memcpy (&orgAddr[1], diallingNum, orgAddr_len - 1);
+		orgAddr[orgAddr_len + 1] = '\0';
+	}
+	else {
+		memcpy (orgAddr, diallingNum, orgAddr_len);
+		orgAddr[orgAddr_len] = '\0';
+	}
+
+	/* TP-PID */
+	tpdu_deliver.pId = pTPDU[position];
+
+	position++;
+
+	/* TP-DCS */
+	SmsUtilDecodeDCS (&tpdu_deliver.dcs, pTPDU[position]);
+	dcs_pos = position;
+	position++;
+
+	/* TP-SCTS */
+	SmsUtilDecodeTimeStamp (&pTPDU[position], &SCTimeStamp);
+
+	position += 7;
+
+	/* TP-UDL */
+	tpdu_deliver.udl = pTPDU[position];
+
+	if (tpdu_deliver.udl > SMS_SMDATA_SIZE_MAX)
+		tpdu_deliver.udl = SMS_SMDATA_SIZE_MAX;
+
+	position++;
+
+	/* TP-UD */
+	tpdu_deliver.userData = malloc (
+			sizeof(unsigned char) * (SMS_SMDATA_SIZE_MAX + 1));
+	if (!tpdu_deliver.userData)
+		return 0;
+
+	memset (tpdu_deliver.userData, 0,
+			sizeof(unsigned char) * (SMS_SMDATA_SIZE_MAX + 1));
+
+	if (tpdu_deliver.dcs.alphabet_type == SMS_ALPHABET_DEFAULT) {
+		char inData[SMS_SMDATA_SIZE_MAX + 1];
+
+		memset (inData, 0x00, SMS_SMDATA_SIZE_MAX + 1);
+
+		memcpy ((void*) inData, (void*) &pTPDU[position], tpdu_deliver.udl);
+
+		SmsUtilUnpackGSMCode (tpdu_deliver.userData, inData,
+				(unsigned char) tpdu_deliver.udl);
+	}
+
+	msg("*************************************");
+	msg("Msg Type: TPDU_DELIVER");
+
+	if (tpdu_deliver.rp) {
+		msg("RP: Set Reply Path")
+	}
+	else if (!tpdu_deliver.rp) {
+		msg("RP: Not set Reply Path")
+	}
+
+	if (tpdu_deliver.sri) {
+		msg("SRI: A status report shall be returned to the SME")
+	}
+	else if (!tpdu_deliver.sri) {
+		msg("SRI: A status report shall be not returned to the SME")
+	}
+
+	if (tpdu_deliver.mms) {
+		msg("MMS: No more messages are waiting for the MS in this SC")
+	}
+	else if (!tpdu_deliver.mms) {
+		msg("MMS: More messages are waiting for the MS in this SC")
+	}
+
+	if (tpdu_deliver.udhi) {
+		msg("UDHI: Contains a Header in addition to the short message.")
+	}
+	else if (!tpdu_deliver.udhi) {
+		msg("UDHI: Only short message.")
+	}
+
+	msg("DcsClass : %x (4 means Class None) ", tpdu_deliver.dcs.class_type);
+
+	msg("From : %10s", orgAddr);
+	msg("Time : %d-%d-%d  , %d:%d:%d", SCTimeStamp.year, SCTimeStamp.month,
+			SCTimeStamp.day, SCTimeStamp.hour, SCTimeStamp.minute,
+			SCTimeStamp.second);
+	msg("Message : %s ", tpdu_deliver.userData);
+	msg("*************************************");
+
+	if (tpdu_deliver.userData) {
+		free(tpdu_deliver.userData);
+	}
+
+	return dcs_pos;
+}
+
+
+
+static int DecodeSmsStatusReportTpdu (int tpdu_len, char* pTPDU)
+{
+	TPDU_SMS_STATUS_REPORT status_report;
+
+	TmDateTime SCTimeStamp;
+	TmDateTime DischargeTime;
+
+	int rcpAddr_len = 0;
+	char diallingNum[SMS_ADDRESS_LEN_MAX];
+
+	char rcpAddr[SMS_ADDRESS_LEN_MAX]; //recipient number
+	int rcp_ton, rcp_npi;
+	int position = 0;
+	unsigned int mask;
+
+	/* TP-MTI, TP MMS, TP SRQ, TP_UDHI */
+
+	status_report.msg_type = pTPDU[position] & 0x03; // bit 0,1
+	status_report.mms = pTPDU[position] & 0x04 ? TRUE : FALSE; // bit 2
+	status_report.srq = pTPDU[position] & 0x20 ? TRUE : FALSE; //bit 5
+	status_report.udhi = pTPDU[position] & 0x40 ? TRUE : FALSE;	 //bit 6
+
+	position++;
+
+	/* TP-MR */
+	status_report.mr = pTPDU[position];
+	position++;
+
+	/* TP-RA */
+
+	memset (diallingNum, 0, sizeof (diallingNum));
+
+	SmsUtilDecodeAddrField (diallingNum, &pTPDU[position], &rcp_ton, &rcp_npi);
+
+	position += 2;
+
+	rcpAddr_len = strlen ((char*) diallingNum);
+	if (rcpAddr_len % 2)
+		position += rcpAddr_len / 2 + 1;
+	else
+		position += rcpAddr_len / 2;
+
+	if (rcp_ton == SMS_TON_INTERNATIONAL) {
+		rcpAddr[0] = '+';
+		memcpy (&rcpAddr[1], diallingNum, rcpAddr_len);
+		rcpAddr[rcpAddr_len + 1] = '\0';
+	}
+	else {
+		memcpy (rcpAddr, diallingNum, rcpAddr_len);
+		rcpAddr[rcpAddr_len] = '\0';
+	}
+
+	status_report.rcpAddr.DialNumLen = rcpAddr_len;
+	memcpy (status_report.rcpAddr.szDiallingNum, rcpAddr, rcpAddr_len);
+	status_report.rcpAddr.Npi = rcp_npi;
+	status_report.rcpAddr.Ton = rcp_ton;
+
+	/* TP-SCTS */
+	SmsUtilDecodeTimeStamp (&pTPDU[position], &SCTimeStamp);
+	position += 7;
+
+	/* TP-DT */
+	SmsUtilDecodeTimeStamp (&pTPDU[position], &DischargeTime);
+	position += 7;
+
+	/* TP-ST */
+	status_report.status = pTPDU[position];
+	position++;
+
+	/* TP-PI */
+	status_report.paraInd = pTPDU[position];
+
+	mask = status_report.paraInd;
+
+	if ( (mask != 0xFF) && (mask != 0)) {
+		/* Increment only if mask is valid */
+		position++;
+
+		/* TP-PID */
+		if (mask & 0x01) {
+			status_report.pId = pTPDU[position];
+			position++;
+		}
+		/* TP-DCS */
+		if (mask & 0x02) {
+			SmsUtilDecodeDCS (&status_report.dcs, pTPDU[position]);
+			position++;
+		}
+		if (mask & 0x04) {
+			/* TP-UDL */
+			status_report.udl = pTPDU[position];
+			position++;
+
+			/* TP-UD */
+
+			status_report.userData = malloc (
+					sizeof(unsigned char) * (SMS_SMDATA_SIZE_MAX + 1));
+			if (!status_report.userData)
+				return -1;
+
+			memset (status_report.userData, 0,
+					sizeof(unsigned char) * (SMS_SMDATA_SIZE_MAX + 1));
+
+			if (status_report.dcs.alphabet_type == SMS_ALPHABET_DEFAULT) {
+				char inData[SMS_SMDATA_SIZE_MAX + 1];
+
+				memset (inData, 0x00, SMS_SMDATA_SIZE_MAX + 1);
+
+				memcpy ((void*) inData, (void*) &pTPDU[position],
+						status_report.udl);
+
+				SmsUtilUnpackGSMCode (status_report.userData, inData,
+						(unsigned char) status_report.udl);
+			}
+
+		}
+	}
+
+	msg("*************************************");
+	msg("Msg Type: STATUS_REPORT");
+	if (status_report.mms) {
+		msg("MMS: No more messages are waiting for the MS in this SC")
+	}
+	else if (!status_report.mms) {
+		msg("MMS: More messages are waiting for the MS in this SC")
+	}
+
+	if (status_report.srq) {
+		msg("SRQ: the result of an SMS COMMAND ")
+	}
+	else if (!status_report.srq) {
+		msg("SRQ: the result of a SMS SUBMIT.")
+	}
+
+	if (status_report.udhi) {
+		msg("UDHI: Contains a Header in addition to the short message.")
+	}
+	else if (!status_report.udhi) {
+		msg("UDHI: Only Short Message")
+	}
+
+	msg("STATUS:%x", status_report.status);
+	if (status_report.status == 0x00) {
+		msg("STATUS : Short message received by the SME")
+	}
+	else if (status_report.status == 0x01) {
+		msg(
+				"STATUS : Short message forwarded by the SC to the SMEbut the SC is unable to confirm delivery")
+	}
+	else if (status_report.status == 0x02) {
+		msg("STATUS : Short message replaced by the SC")
+	}
+
+	msg("Recipient Number : %s", rcpAddr);
+	msg("SC Time Stamp : %d-%d-%d  , %d:%d:%d", SCTimeStamp.year,
+			SCTimeStamp.month, SCTimeStamp.day, SCTimeStamp.hour,
+			SCTimeStamp.minute, SCTimeStamp.second);
+	msg("Discharge Time : %d-%d-%d  , %d:%d:%d", DischargeTime.year,
+			DischargeTime.month, DischargeTime.day, DischargeTime.hour,
+			DischargeTime.minute, DischargeTime.second);
+
+	if (mask & 0x04)
+		msg("Message : %s ", status_report.userData);
+
+	msg("*************************************");
+
+	if (status_report.userData) {
+		free(status_report.userData);
+	}
+
+	return 1;
+}
+
+
+static void on_noti_sms_incom_msg (TapiHandle *handle, const char *noti_id,
+		void *data, void *user_data)
+{
+	TelSmsDatapackageInfo_t *datapackage = data;
+
+	int scaAddr_len = 0;
+	char * pTPDU;
+	int tpdu_len = 0;
+	char diallingNum[TAPI_NETTEXT_ADDRESS_LEN_MAX + 1] = { 0, };
+	char scaAddr[TAPI_NETTEXT_SCADDRESS_LEN_MAX + 2] = { 0, }; //service center address
+	int sca_ton, sca_npi;
+	int position = 0;
+	int sca_length;
+	int offset = 0;
+
+	unsigned char MTI = 0;
+	unsigned char MMS = 0;
+	unsigned char SRI = 0;
+	unsigned char UDHI = 0;
+	unsigned char RP = 0;
+
+	Sms_coding_scheme dcs;
+	TapiResult_t returnStatus;
+	TelSmsData_t WriteData;
+	TelSmsDatapackageInfo_t * del_report = NULL;
+
+	if (datapackage == NULL) {
+		return;
+	}
+
+	msg("");
+	msgb("event(%s) receive !!", TAPI_NOTI_SMS_INCOM_MSG);
+
+	memset (diallingNum, 0, sizeof (diallingNum));
+
+	sca_length = datapackage->Sca[0];
+
+	sca_ton = (datapackage->Sca[offset +1] & 0x70) >> 4;
+	sca_npi = datapackage->Sca[offset +1] & 0x0F;
+
+	msg("TON %d", sca_ton);
+	msg("NPI %d", sca_npi);
+
+	/* Modem Send the hex encoded SCA Service center digits*/
+	scaAddr_len = _util_hexstring_to_asciistring(&datapackage->Sca[2], (unsigned char *) diallingNum, sca_length-1);
+
+	msg("SCA ascii length%d", scaAddr_len);
+	msg("SCA Number:[%s]", diallingNum);
+
+	if (scaAddr_len > TAPI_NETTEXT_SCADDRESS_LEN_MAX)
+		scaAddr_len = TAPI_NETTEXT_SCADDRESS_LEN_MAX;
+
+	if (sca_ton == SMS_TON_INTERNATIONAL) {
+		scaAddr[0] = '+';
+		memcpy (&scaAddr[1], diallingNum, scaAddr_len - 1);
+	}
+	else {
+		memcpy (scaAddr, diallingNum, scaAddr_len);
+	}
+
+	msg("Sc address in test app is %s", scaAddr);
+
+	RP = datapackage->szData[position] & 0x80;
+	UDHI = datapackage->szData[position] & 0x40;
+	SRI = datapackage->szData[position] & 0x20;
+	MMS = datapackage->szData[position] & 0x04;
+	MTI = datapackage->szData[position] & 0x03;
+
+	msg("RP [%x]", RP);
+	msg("UDHI [%x]", UDHI);
+	msg("SRI [%x]", SRI);
+	msg("MMS [%x]", MMS);
+	msg("MTI [%02x]", MTI);
+
+	tpdu_len = datapackage->MsgLength;
+
+	pTPDU = malloc (sizeof(unsigned char) * tpdu_len);
+	if (pTPDU == NULL)
+		return;
+
+	memcpy (pTPDU, &datapackage->szData[position], tpdu_len);
+
+	if (MTI == SMS_TPDU_DELIVER) {
+		DecodeSmsDeliverTpdu (tpdu_len, pTPDU);
+
+		msg("dcs_pos : %d", dcs_pos);
+
+		SmsUtilDecodeDCS (&dcs, datapackage->szData[position + dcs_pos]);
+
+		if (dcs.class_type == SMS_CLASS_2) {
+			msg("dcs type is of class2");
+
+			memset (&WriteData, 0, sizeof(TelSmsData_t));
+
+			memcpy (WriteData.SmsData.Sca, datapackage->Sca,
+					TAPI_SIM_SMSP_ADDRESS_LEN);
+
+			WriteData.SmsData.MsgLength = datapackage->MsgLength;
+
+			memcpy (WriteData.SmsData.szData, datapackage->szData,
+					datapackage->MsgLength);
+
+			WriteData.MsgStatus = TAPI_NETTEXT_STATUS_READ;
+			WriteData.SmsData.format = TAPI_NETTEXT_NETTYPE_3GPP;
+
+			returnStatus = tel_write_sms_in_sim (handle, &WriteData,
+					on_resp_save_msg, NULL );
+
+			msg("returnStatus for tel_write_sms_in_sim(): 0x%x", returnStatus);
+		}
+
+	}
+	else if (MTI == SMS_TPDU_STATUS_REPORT) {
+		DecodeSmsStatusReportTpdu (tpdu_len, pTPDU);
+	}
+	del_report = malloc (sizeof(TelSmsDatapackageInfo_t));
+	if (del_report == NULL) {
+		free(pTPDU);
+		return;
+	}
+	memset (del_report, 0, sizeof(TelSmsDatapackageInfo_t));
+
+	memcpy (del_report->Sca, datapackage->Sca, TAPI_SIM_SMSP_ADDRESS_LEN);
+
+	del_report->szData[0] = SMS_TPDU_DELIVER_REPORT;	//TP-UDHI[bit6] : 0
+	del_report->szData[1] = 0;// TP-PI = 0; bit2: TP-UDL bit1: TP-DCS bit0: TP-PID (No option field)
+	del_report->MsgLength = 2;
+	del_report->format = TAPI_NETTEXT_NETTYPE_3GPP;
+
+	msg("***receive message (Api:SendDeliverreport)****");
+
+	returnStatus = tel_send_sms_deliver_report (handle, del_report,
+			TAPI_NETTEXT_SENDSMS_SUCCESS, on_resp_DeliverReport_msg, NULL );
+
+	msg("returnStatus for tel_send_sms_deliver_report(): 0x%x", returnStatus);
+
+	free (del_report);
+
+	free (pTPDU);
+
+}
+
+static void on_noti_sms_cb_incom_msg (TapiHandle *handle, const char *noti_id,
+		void *data, void *user_data)
+{
+	TelSmsCbMsg_t *cbMsg = data;
+	int length = 0;
+	char pPDU[SMS_CB_SIZE_MAX + 3] = { 0, };
+
+	msg("");
+	msgb("event(%s) receive !!", TAPI_NOTI_SMS_CB_INCOM_MSG);
+
+	length = cbMsg->Length;
+	pPDU[0] = cbMsg->CbMsgType;
+	pPDU[1] = length;
+	memcpy (& (pPDU[2]), cbMsg->szMsgData, SMS_CB_SIZE_MAX + 1);
+
+	DecodeCellBroadcastMsg (length, pPDU);
+}
+
+static void on_noti_sms_etws_incom_msg (TapiHandle *handle, const char *noti_id,
+		void *data, void *user_data)
+{
+	TelSmsEtwsMsg_t *etwsMsg = data;
+	int length = 0;
+	char pPDU[TAPI_NETTEXT_ETWS_SIZE_MAX + 3] = { 0, };
+
+	msg("");
+	msgb("event(%s) receive !!", TAPI_NOTI_SMS_ETWS_INCOM_MSG);
+
+	length = etwsMsg->Length;
+	pPDU[0] = etwsMsg->EtwsMsgType;
+	pPDU[1] = length;
+	memcpy (& (pPDU[2]), etwsMsg->szMsgData, TAPI_NETTEXT_ETWS_SIZE_MAX + 1);
+}
+
+
+
+static void on_noti_sms_memory_status (TapiHandle *handle, const char *noti_id,
+		void *data, void *user_data)
+{
+	int *memory_status = data;
+
+	msg("");
+	msgb("event(%s) receive !!", TAPI_NOTI_SMS_MEMORY_STATUS);
+	msg(" - memory_status = 0x%x", *memory_status);
+}
+
+static void on_noti_sms_ready_status (TapiHandle *handle, const char *noti_id,
+		void *data, void *user_data)
+{
+	gboolean *device_ready = data;
+
+	msg("");
+	msgb("event(%s) receive !!", TAPI_NOTI_SMS_DEVICE_READY);
+	msg(" - device_ready = %s", *device_ready ? "TRUE" : "FALSE");
+}
+
+static void on_resp_send_msg (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	msg("");
+	msgb("tel_send_sms() response receive");
+	msg(" - result = 0x%x", result);
+}
+
+static void on_resp_read_msg (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	TelSmsData_t * sim_data;
+	int scaAddr_len = 0;
+	char * pTPDU;
+	int tpdu_len = 0;
+	char diallingNum[TAPI_NETTEXT_ADDRESS_LEN_MAX + 1] = { 0, };
+	char scaAddr[TAPI_NETTEXT_SCADDRESS_LEN_MAX + 2] = { 0, }; //service center address
+	int sca_ton, sca_npi;
+	int position;
+
+	if (data == NULL ) {
+		msg("data is Null");
+		return;
+	}
+
+	sim_data = (TelSmsData_t *) data;
+
+	if (sim_data->MsgStatus == TAPI_NETTEXT_STATUS_UNREAD)
+		msg("Msg Staus : received unread msg")
+	else if (sim_data->MsgStatus == TAPI_NETTEXT_STATUS_READ)
+		msg("Msg Staus : received read msg")
+	else if (sim_data->MsgStatus == TAPI_NETTEXT_STATUS_UNSENT)
+		msg("Msg Staus : unsent msg")
+	else
+		msg("Msg Staus : [%d]", sim_data->MsgStatus)
+
+	msg("First Data [%x]", sim_data->SmsData.szData[0]);
+	msg("Second Data [%x]", sim_data->SmsData.szData[1]);
+	msg("Third Data [%x]", sim_data->SmsData.szData[2]);
+	msg("Fourth Data [%x]", sim_data->SmsData.szData[3]);
+
+	position = 0;
+	// SCA_ADDR
+	memset (diallingNum, 0, sizeof (diallingNum));
+
+	SmsUtilDecodeAddrField (diallingNum, (char *) sim_data->SmsData.Sca,
+			&sca_ton, &sca_npi);
+
+	position += 2;  //include Address-Length, Type of Address
+
+	scaAddr_len = strlen ((char *) diallingNum);
+	if (scaAddr_len > TAPI_NETTEXT_SCADDRESS_LEN_MAX - 1)
+		scaAddr_len = TAPI_NETTEXT_SCADDRESS_LEN_MAX - 1;
+
+	if (scaAddr_len % 2)
+		position += scaAddr_len / 2 + 1;
+	else
+		position += scaAddr_len / 2;
+
+	if (sca_ton == SMS_TON_INTERNATIONAL) {
+		scaAddr[0] = '+';
+		memcpy (&scaAddr[1], diallingNum, scaAddr_len);
+	}
+	else {
+		memcpy (scaAddr, diallingNum, scaAddr_len);
+	}
+
+	tpdu_len = sim_data->SmsData.MsgLength;
+
+	msg("SCA Number : %s tpdu_len is %d", scaAddr, tpdu_len);
+
+	pTPDU = malloc (sizeof(unsigned char) * tpdu_len);
+	if (!pTPDU)
+		return;
+
+	msg("bfor memcopy position is %d", position);
+	memcpy (pTPDU, & (sim_data->SmsData.szData[0]), tpdu_len);
+	msg("after memcpy");
+
+	DecodeSmsDeliverTpdu (tpdu_len, pTPDU);
+
+	free (pTPDU);
+}
+
+static void on_resp_save_msg (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	int *local_index = data;
+
+	msg("");
+	msgb("tel_write_sms_in_sim() response receive");
+	msg(" - result = 0x%x", result);
+	msg(" - local_index = %d", *local_index);
+}
+
+static void on_resp_delete_msg (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	int *local_index = data;
+
+	msg("");
+	msgb("tel_delete_sms_in_sim() response receive");
+	msg(" - result = 0x%x", result);
+	msg(" - local_index = %d", *local_index);
+}
+
+static void on_resp_DeliverReport_msg (TapiHandle *handle, int result,
+		void *data, void *user_data)
+{
+	int *local_index = data;
+
+	msg("");
+	msgb("tel_send_sms_deliver_report() response receive");
+	msg(" - result = 0x%x", result);
+	msg(" - local_index = %d", *local_index);
+}
+
+static void on_resp_set_sms_sca (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	msg("");
+	msgb("tel_set_sms_sca() response receive");
+	msg(" - result = 0x%x", result);
+}
+
+static void on_resp_set_sms_cb_config (TapiHandle *handle, int result,
+		void *data, void *user_data)
+{
+	msg("");
+	msgb("tel_set_sms_cb_config() response receive");
+	msg(" - result = 0x%x", result);
+}
+
+static void on_resp_set_sms_params (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	msg("");
+	msgb("tel_set_sms_params() response receive");
+	msg(" - result = 0x%x", result);
+}
+
+static void on_resp_set_mem_status (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	msg("");
+	msgb("tel_set_sms_mem_status() response receive");
+	msg(" - result = 0x%x", result);
+}
+
+static void on_resp_get_sms_sca (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	TelSmsAddressInfo_t *scaInfo = data;
+	unsigned int i = 0;
+
+	msg("");
+	msgb("tel_get_sms_sca() response receive");
+	msg(" - result = 0x%x", result);
+	msg(" - TON = %d", scaInfo->Ton);
+	msg(" - NPI = %d", scaInfo->Npi);
+	msg(" - DialNumLen = %d", scaInfo->DialNumLen);
+	msg(" - SCA Num");
+
+	for (i = 0; i < scaInfo->DialNumLen; i++) {
+		msg("[%02x]", scaInfo->szDiallingNum[i]);
+		if (i % 10 == 9)
+			msg("\n");
+	}
+}
+
+static void on_resp_get_cb_config (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	TelSmsCbConfig_t * CBConfig;
+	int i = 0;
+
+	if (data == NULL ) {
+		msg("pData is Null")
+		return;
+	}
+
+	CBConfig = (TelSmsCbConfig_t *) data;
+
+	msg("");
+	msgb("tel_get_sms_cb_config() response receive");
+	msg(" - result = 0x%x", result);
+
+	msg("=========CB Configuration=========");
+
+	/*** CB Enable/Diable ***/
+	if (CBConfig->CBEnabled == TRUE)
+		msg("Cell Broadcast Msg Enabled...")
+	else
+		msg("Cell Broadcast Msg Disabled...")
+
+	/*** Selected ID ***/
+	if (CBConfig->Net3gppType == 0x01)
+		msg("Network type is 3gpp ")
+	else if (CBConfig->Net3gppType == 0x02)
+		msg("Network type is CDMA");
+
+	/*** CBMI  Count ***/
+	msg("CBMI Range Count: %d \n", CBConfig->MsgIdRangeCount);
+
+	/*** CBMI  List ***/
+	if (CBConfig->MsgIdRangeCount != 0) {
+		msg("----- CBMI List -----");
+		for (i = 0; i < CBConfig->MsgIdRangeCount; i++) {
+			msg("From No.%d - [0x%04x]", i,
+					CBConfig->MsgIDs[i].Net3gpp.FromMsgId);
+			msg("To No.%d - [0x%04x]", i, CBConfig->MsgIDs[i].Net3gpp.ToMsgId);
+		}
+	}
+	msg("==================================");
+}
+
+static void on_resp_get_sms_parameters (TapiHandle *handle, int result,
+		void *data, void *user_data)
+{
+	TelSmsParams_t *smsp_param;
+	int i = 0;
+
+	if (data == NULL ) {
+		msg("data is Null")
+		return;
+	}
+	smsp_param = (TelSmsParams_t *) data;
+
+	msg("");
+	msgb("tel_get_sms_parameters() response receive");
+	msg(" - result = 0x%x", result);
+
+	msg("record index is 0x%x", smsp_param->RecordIndex);
+	msg("record len  is 0x%x", smsp_param->RecordLen);
+	msg("alpha_id len  is 0x%x ", (int )smsp_param->AlphaIdLen);
+	msg("alpha_id is %s ", smsp_param->szAlphaId);
+	msg("param indicator is  0x%x", smsp_param->ParamIndicator);
+
+	for (i = 0; i < (int) smsp_param->TpDestAddr.DialNumLen; i++)
+		msg("DestAddr = %d [%02x]", i, smsp_param->TpDestAddr.szDiallingNum[i]);
+
+	for (i = 0; i < (int) smsp_param->TpSvcCntrAddr.DialNumLen; i++)
+		msg("SCAddr = %d [%02x]", i, smsp_param->TpSvcCntrAddr.szDiallingNum[i]);
+
+	msg("pid 0x%x", smsp_param->TpProtocolId);
+	msg("dcs is 0x%x", smsp_param->TpDataCodingScheme);
+	msg("validity is 0x%x", smsp_param->TpValidityPeriod);
+}
+
+static void on_resp_get_paramcnt (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	int * RecordCount;
+
+	if (data == NULL ) {
+		msg("data is Null")
+		return;
+	}
+
+	RecordCount = (int *) data;
+
+	msg("");
+	msgb("tel_get_sms_parameter_count() response receive");
+	msg(" - result = 0x%x", result);
+	msg(" - In param_count_noti the record count is %d", *RecordCount);
+}
+
+static void on_resp_get_sms_count (TapiHandle *handle, int result, void *data,
+		void *user_data)
+{
+	static TelSmsStoredMsgCountInfo_t *countInfo;
+	int loop_counter = 0;
+	TapiResult_t returnStatus = TAPI_API_SUCCESS;
+
+	if (data == NULL ) {
+		msg("data is Null")
+		return;
+	}
+
+	countInfo = (TelSmsStoredMsgCountInfo_t*) data;
+
+	msg("");
+	msgb("tel_get_sms_count() response receive");
+	msg(" - result = 0x%x", result);
+
+	if (countInfo->UsedCount != 0x00)	//if used count is not zero
+			{
+		msg("Index LIST..........");
+		for (loop_counter = 0; loop_counter < countInfo->UsedCount;
+				loop_counter++) {
+			msg("[%02x]", countInfo->IndexList[loop_counter]);
+			returnStatus = tel_read_sms_in_sim (handle,
+					countInfo->IndexList[loop_counter], on_resp_read_msg,
+					NULL );
+			msg("After read msg: returnstatus %d", returnStatus);
+		}
+		msg("In MsgCountNotification total cnt is %d, usedcnt is %dapi_err %d",
+				countInfo->TotalCount, countInfo->UsedCount, returnStatus);
+	}
+
+	msg("In MsgCountNotification total cnt is %d, usedcnt is %d",
+			countInfo->TotalCount, countInfo->UsedCount);
+
+}	//Madhavi
+
+static int SendMessage (MManager *mm, struct menu_data *menu)
+{
+	int ret;
+	int msg_len = 0;
+	char buf[SMS_ADDRESS_LEN_MAX];
+	char message[512];
+	char diallingNum[SMS_ADDRESS_LEN_MAX];
+	int diallingNum_len = 0;
+
+	memset (buf, 0, sizeof (buf));
+	memset (diallingNum, 0, sizeof (diallingNum));
+	diallingNum_len = 0;
+
+	msg("Enter destination Number: ");
+
+	ret = read (0, buf, sizeof (buf));
+	if (ret < 0) {
+		if (errno == EINTR)
+			perror ("read(1)");
+		return -1;
+	}
+	else if (ret == 0)
+		return ret;
+
+	buf[SMS_ADDRESS_LEN_MAX - 1] = '\0';
+	diallingNum_len = strlen (diallingNum);
+	memcpy (&diallingNum[diallingNum_len], buf, strlen (buf));
+
+	diallingNum_len = strlen (diallingNum); //recalculate
+	msg("dialling num %s and dialling num len is %d", diallingNum,
+			diallingNum_len);
+	diallingNum[diallingNum_len] = 0;
+	diallingNum_len = diallingNum_len - 1;
+
+	msg("Enter Message: ");
+	memset (message, 0, sizeof (message));
+
+	ret = read (0, message, sizeof (message) - 1);
+
+	if (ret <= 0) {
+		msg(" NULL msg can NOT be sent ");
+		return -1;
+	}
+	message[sizeof (message) - 1] = '\0';
+
+	msg_len = strlen (message);
+	message[--msg_len] = 0;
+
+	msg("==========================");
+	msg("To :%s", diallingNum);
+	msg("Message: %sMsg Length:%d", message, msg_len);
+	msg("Dialling number Length : %d", diallingNum_len);
+	msg("==========================\n");
+
+	EncodeSmsSubmitTpdu (mm, diallingNum, diallingNum_len, message, msg_len);
+	return 1;
+
+}
+
+static int SendMessageCDMA ()
+{
+	int ret;
+	int msg_len = 0;
+	char buf[512] = { 0, };
+	char message[512] = { 0, };
+	char diallingNum[SMS_ADDRESS_LEN_MAX + 1] = { 0, };
+	int diallingNum_len = 0;
+
+	printf ("\n");
+	printf ("Enter destination Number:\n>> ");
+	fflush (stdout);
+
+	ret = read (0, buf, sizeof (buf));
+	if (ret < 0) {
+		if (errno == EINTR)
+			perror ("read(1)");
+		return -1;
+	}
+	else if (ret == 0)
+		return ret;
+
+	buf[SMS_ADDRESS_LEN_MAX - 1] = '\0';
+	memcpy (diallingNum, buf, sizeof (diallingNum));
+	diallingNum_len = strlen (diallingNum);
+
+	printf ("dialling num [%s], dialling num len [%d]\n", diallingNum,
+			diallingNum_len);
+	printf ("Enter Message\n>> ");
+	fflush (stdout);
+
+	ret = read (0, message, sizeof (message) - 1);
+	if (ret <= 0) {
+		printf (" NULL msg can NOT be sent \n");
+		return -1;
+	}
+	message[sizeof (message) - 1] = '\0';
+
+	msg_len = strlen (message);
+
+	printf ("===========================\n");
+	printf ("To: [%s] (len: %d)\n", diallingNum, diallingNum_len);
+	printf ("Message: [%s]\nMsg Length: [%d]\n", message, msg_len);
+	printf ("===========================\n\n");
+
+	EncodeCdmaSmsSubmitTpdu (diallingNum, diallingNum_len, message, msg_len);
+	//EncodeSmsSubmitTpdu(diallingNum, diallingNum_len,message, msg_len) ;
+
+	return 1;
+}
+
+static int ReadMessage (MManager *mm, struct menu_data *menu)
+{
+	TapiHandle *handle = menu_manager_ref_user_data (mm);
+	int selectedNo;
+	int ret;
+	char buf[100];
+	int returnStatus = 0;
+
+	memset (buf, 0, sizeof (buf));
+
+	msg("*************************************");
+	msg("1. SIM Message");
+
+	msg("Select Number:");
+
+	ret = read (0, buf, sizeof (buf));
+
+	if (ret < 0) {
+		if (errno == EINTR)
+			perror ("read(1)");
+		return -1;
+	}
+	else if (ret == 0)
+		return ret;
+
+	selectedNo = atoi (buf);
+	msg("Selected Num in read message(value is 1) is %d ", selectedNo);
+	switch (selectedNo) {
+		case 1:
+
+			msg("***Reading the message in SIM***")
+			;
+			returnStatus = tel_get_sms_count (handle, on_resp_get_sms_count,
+					NULL );
+			msg("tel_get_sms_count():  0x%x", returnStatus)
+			;
+
+			break;
+		default:
+			msg("Not supported Menu(%d) !!!", selectedNo)
+			;
+			break;
+	}
+
+	return 1;
+}
+
+static int DeleteMessage (MManager *mm, struct menu_data *menu)
+{
+	TapiHandle *handle = menu_manager_ref_user_data (mm);
+
+	int ret;
+	int local_index;
+	char buf[100];
+
+	TapiResult_t returnStatus;
+
+	memset (buf, 0, sizeof (buf));
+
+	msg("Enter delete index >>");
+
+	ret = read (0, buf, sizeof (buf));
+	if (ret < 0) {
+		if (errno == EINTR)
+			perror ("read(1)");
+		return -1;
+	}
+	else if (ret == 0)
+		return ret;
+
+	local_index = atoi (buf);
+	msg("index value :%d", local_index);
+
+	msg("***Deleting the message(Api:DeleteMsg,GetMsgCount)***");
+
+	returnStatus = tel_delete_sms_in_sim (handle, local_index, on_resp_delete_msg,
+			NULL );
+	msg("returnstatus  tel_delete_sms_in_sim()  is for delete%d ", returnStatus);
+	returnStatus = tel_get_sms_count (handle, on_resp_get_sms_count, NULL );
+	msg("returnStatus for tel_get_sms_count()  %d", returnStatus);
+
+	return 1;
+
+}
+
+static int Getting (MManager *mm, struct menu_data *menu)
+{
+	TapiHandle *handle = menu_manager_ref_user_data (mm);
+	int selectedNo;
+	int returnStatus = 0;
+	gboolean bReadyStatus = FALSE;
+
+	selectedNo = atoi (menu->key);
+
+	switch (selectedNo) {
+		case 1:
+			msg("***Getting the SCA(Api: GetSCA)****")
+			;
+			returnStatus = tel_get_sms_sca (handle, 0, on_resp_get_sms_sca,
+					NULL );
+			msg("returnstatus for tel_get_sms_sca(): 0x %x", returnStatus)
+			;
+
+			break;
+
+		case 2:
+			msg("***Getting the CB Configuration(Api: GetCBConfig)***")
+			;
+			returnStatus = tel_get_sms_cb_config (handle, on_resp_get_cb_config,
+					NULL );
+			msg("ReturnStatus[%d] ", returnStatus)
+			;
+
+			break;
+
+		case 3:
+			msg("****Getting the parameter(Api:GetParameter)****")
+			;
+			returnStatus = tel_get_sms_parameters (handle, 0,
+					on_resp_get_sms_parameters, NULL );
+			msg("ReturnStatus[%d]]", returnStatus)
+			;
+
+			break;
+
+		case 5:
+			msg("***Getting the parameterCount(Api:GetParameterCount)***")
+			;
+			returnStatus = tel_get_sms_parameter_count (handle,
+					on_resp_get_paramcnt, NULL );
+			msg("ReturnStatus[%d]", returnStatus)
+			;
+			break;
+
+		case 6:
+			msg("***Getting the SmsCount(Api:GetSmsCount)***")
+			;
+			returnStatus = tel_get_sms_count (handle, on_resp_get_sms_count,
+					NULL );
+			msg("ReturnStatus[%d]", returnStatus)
+			;
+
+			break;
+
+		case 7:
+			msg(
+					"***Getting the Sms Ready status(Api:Check_sms_device_status)***")
+			;
+			returnStatus = tel_check_sms_device_status (handle, &bReadyStatus);
+			msg("ReturnStatus[%d]", returnStatus)
+			;
+			msg("Ready status = %s", bReadyStatus ? "TRUE" : "FALSE")
+			;
+
+			break;
+
+		default:
+			return -1;
+
+	}
+
+	return 1;
+}
+
+static int _get_int()
+{
+	char buf[255];
+	int ret;
+
+	memset (buf, 0, 255);
+	ret = read (0, buf, 254);
+	if (ret <= 0)
+		return 0;
+
+	return atoi(buf);
+}
+
+static int Setting (MManager *mm, struct menu_data *menu)
+{
+	TapiHandle *handle = menu_manager_ref_user_data (mm);
+
+	int settingMenu;
+	int ret;
+	int i;
+
+	char MemoryStatus[255] = { 0, }; //2006/8/8
+
+	TelSmsCbConfig_t *pCBConfig;
+
+	TelSmsParams_t smsParameters = { 0, };
+	TapiResult_t returnStatus;
+
+	settingMenu = atoi (menu->key);
+
+	switch (settingMenu) {
+		case 1:  //Set Service Center Number
+		{
+			TelSmsAddressInfo_t sca = {0, };
+			unsigned char sca_num[TAPI_SIM_SMSP_ADDRESS_LEN + 1];
+			unsigned int sca_length = 0;
+			unsigned int additional_len = 0;
+			unsigned local_index, j;
+
+			msg("*** Setting SCA (API: tel_set_sms_sca()) ****");
+
+			RETRY:
+			msg("Enter the SCA NUMBER:");
+			ret = scanf("%s", sca_num);
+			if (ret > TAPI_SIM_SMSP_ADDRESS_LEN) {
+				msg("Entered SCA is INVALID - SCA length cannot be greater than %d", TAPI_SIM_SMSP_ADDRESS_LEN);
+				goto RETRY;
+			}
+			sca.Npi = TAPI_SIM_NPI_ISDN_TEL;
+			sca.Ton = TAPI_SIM_TON_UNKNOWN;
+			if (sca_num[0] == '+') {
+				sca.Ton = TAPI_SIM_TON_INTERNATIONAL;
+			 	additional_len = 1;
+			}
+			sca_length = strlen((char *)sca_num) - additional_len;
+			msg("Sca Length:[%d]", sca_length);
+
+			if (sca_length % 2 == 0) {
+				for (local_index = additional_len, j = 0; local_index < sca_length; local_index += 2, j++)
+					sca.szDiallingNum[j] = ((sca_num[local_index+1] & 0X0F) << 4) | (sca_num[local_index] & 0x0F);
+				sca.szDiallingNum[(sca_length/2)] = '\0';
+				sca.DialNumLen = (sca_length/2);
+			} else {
+				for (local_index = additional_len, j = 0; local_index < sca_length+1; local_index += 2, j++) {
+					if (local_index == (sca_length - 1))
+			    			sca.szDiallingNum[j] = ((0xF0) | (sca_num[local_index] & 0x0F));
+					else
+						sca.szDiallingNum[j] = ((sca_num[local_index+1] & 0X0F) << 4) | (sca_num[local_index] & 0x0F);
+				}
+				sca.szDiallingNum[(sca_length/2)] = sca.szDiallingNum[(sca_length/2)] | 0xF0;
+				sca.DialNumLen = (sca_length/2)+1;
+			}
+			msg("%d", sca.DialNumLen);
+			returnStatus = tel_set_sms_sca (handle, &sca, 0, on_resp_set_sms_sca, NULL);
+			msg("Return status: [%d]", returnStatus);
+		break;
+		}
+
+		case 3: //Set Deliver Report
+		{
+			msg("****Setting  Deliver Report(Api:SetDeliverReport)****");
+			//EncodeSmsDeliverReportTpdu();
+			break;
+		}
+
+		case 4: //Set CB Enable/Disable
+		{
+			msg("****Setting the CB configuration(Api:SetCbConfig)****");
+
+			pCBConfig = calloc (1, sizeof(TelSmsCbConfig_t));
+			if (!pCBConfig)
+				return -1;
+
+			msg("Enter CB ON/OFF (1: Enable, 0:Disable): ");
+			pCBConfig->CBEnabled = _get_int();
+
+			msg("Enter Max ID Count: ");
+			pCBConfig->MsgIdMaxCount = _get_int();
+
+			msg("Enter MsgIdRangeCount ( < 10 ): ");
+			pCBConfig->MsgIdRangeCount = _get_int();
+
+			if (pCBConfig->MsgIdRangeCount <= 0
+					|| pCBConfig->MsgIdRangeCount >= TAPI_NETTEXT_SMS_CBMI_LIST_SIZE_MAX) {
+				msg("Bad Range value");
+				free (pCBConfig);
+				return -1;
+			}
+
+			for (i = 0; i < pCBConfig->MsgIdRangeCount; i++) {
+				msg("Enter %d FromMsgId : ", i + 1);
+				pCBConfig->MsgIDs[i].Net3gpp.FromMsgId = _get_int();
+
+				msg("Enter %d ToMsgId : ", i + 1);
+				pCBConfig->MsgIDs[i].Net3gpp.ToMsgId = _get_int();
+
+				msg("Enter %d Selected : ", i + 1);
+				pCBConfig->MsgIDs[i].Net3gpp.Selected = _get_int();
+			}
+
+			pCBConfig->Net3gppType = 0x01;
+
+			msg(
+					"from sms test setting the cb configuration:CBEnabled:%d,Net3gppType:%d,msgIdRangeCount:%d,From: %d\t To: %d\t Selected: %d",
+					pCBConfig->CBEnabled, pCBConfig->Net3gppType,
+					pCBConfig->MsgIdRangeCount,
+					pCBConfig->MsgIDs[0].Net3gpp.FromMsgId,
+					pCBConfig->MsgIDs[0].Net3gpp.ToMsgId,
+					pCBConfig->MsgIDs[0].Net3gpp.Selected);
+
+			returnStatus = tel_set_sms_cb_config (handle, pCBConfig,
+					on_resp_set_sms_cb_config, NULL );
+			msg("returnStatus after cbconfig set is is [%d]", returnStatus);
+
+			free (pCBConfig);
+
+			break;
+		}
+		case 5: {
+			unsigned int sca_length;
+			unsigned char sca_num[TAPI_SIM_SMSP_ADDRESS_LEN + 1];
+			const char* name = "AlphaID";
+
+			smsParameters.RecordIndex = 0x00;
+
+			/* Alpha Id */
+			smsParameters.AlphaIdLen = strlen(name);
+			memcpy(&smsParameters.szAlphaId, name, strlen(name));
+
+			/* Param Indicator*/
+			smsParameters.ParamIndicator = 0xe1;
+
+			/* Destination Number */
+			memset(&smsParameters.TpDestAddr, 0x0, sizeof(TelSmsAddressInfo_t));
+
+			smsParameters.TpProtocolId = 3;/* PID */
+			smsParameters.TpDataCodingScheme = 2;/* DCS */
+			smsParameters.TpValidityPeriod = 1;/* VP */
+
+			do {
+				msg("Enter the SCA NUMBER:");
+				ret = scanf("%s", sca_num);
+				if (ret > TAPI_SIM_SMSP_ADDRESS_LEN)
+					msg("Entered SCA is INVALID - SCA length cannot be greater than %d", TAPI_SIM_SMSP_ADDRESS_LEN);
+			} while(ret > TAPI_SIM_SMSP_ADDRESS_LEN);
+
+			sca_length = SmsUtilEncodeSca(&(smsParameters.TpSvcCntrAddr), sca_num);
+			msg("Encoded SCA Address Length[%d]", sca_length);
+
+			returnStatus = tel_set_sms_parameters (handle, &smsParameters, on_resp_set_sms_params, NULL );
+			msg("returnstatus after sparam set  is %d", returnStatus);
+
+			break;
+		}
+		case 6: //Set Memory Full Notification
+		{
+			msg(
+					"Enter Memory Status to be set(1:Memory Available, 2:Memory Full)");
+			memset (MemoryStatus, 0, sizeof (MemoryStatus));
+			ret = read (0, MemoryStatus, sizeof (MemoryStatus));
+			if (ret <= 0) {
+				msg(" NULL msg can NOT be sent ");
+				return -1;
+			}
+			msg("Memory Status type is %d ", atoi (MemoryStatus));
+			returnStatus = tel_set_sms_memory_status (handle,
+					atoi (MemoryStatus), on_resp_set_mem_status, NULL ); //Set to full 0x02-Full, 0x01-available
+			msg("api err after memstatus set is is %d", returnStatus);
+
+			break;
+		}
+		case 7: //Set Stored MsgStaus
+		{
+			msg("Not suppored in this Test App !!!");
+			break;
+		}
+		case 8: {
+// JYGU				returnStatus =tel_set_sms_device_status();
+			msg("Not suppored in this Test App !!!");
+			break;
+		}
+		case 9: {
+			msg("Not suppored in this Test App !!!");
+			break;
+		}
+		default:
+			return -1;
+	}
+	return 1;
+}
+
+static struct menu_data menu_sms_getting[] = { { "1",
+		"Get Service Center Number", NULL, Getting, NULL }, { "2",
+		"Get CB Setting Information", NULL, Getting, NULL }, { "3",
+		"Get SMS Parameters", NULL, Getting, NULL }, { "4",
+		"Get SMS PreferredBearer Information (Not supported)", NULL, Getting,
+		NULL }, { "5", "Get SMS Parameter Count", NULL, Getting, NULL }, { "6",
+		"Get Message Count", NULL, Getting, NULL }, { "7",
+		"Get SMS ready status", NULL, Getting, NULL }, { NULL, NULL , }, };
+
+static struct menu_data menu_sms_setting[] =
+		{ { "1", "Set Service Center Number", NULL, Setting, NULL }, { "2",
+				"Set PreferredBearer Type (Not supported)", NULL, Setting, NULL }, { "3",
+				"Set Deliver Report", NULL, Setting, NULL }, { "4",
+				"Set CB Enable/Disable", NULL, Setting, NULL }, { "5",
+				"Set SMS Parameters", NULL, Setting, NULL }, { "6",
+				"Set Memory Status", NULL, Setting, NULL }, { "7",
+				"Set Stored MsgStaus", NULL, Setting, NULL }, { "8",
+				"Set Device Ready", NULL, Setting, NULL }, { "9",
+				"Check Device Status", NULL, Setting, NULL }, { NULL, NULL , }, };
+
+static struct menu_data menu_sms_wcdma[] = { { "1", "Send Message", NULL,
+		SendMessage, NULL }, { "2", "Read Message", NULL, ReadMessage, NULL }, {
+		"3", "Delete Message", NULL, DeleteMessage, NULL }, { "4",
+		"Delete All Message", NULL, NULL, NULL },	//DeleteAllMessage
+		{ "5", "Setting", menu_sms_setting, NULL, NULL }, { "6",
+				"Getting SMS Information", menu_sms_getting, NULL, NULL }, {
+				NULL, NULL , }, };
+
+static struct menu_data menu_sms_cdma[] = { { "1", "Send Message", NULL,
+		SendMessageCDMA, NULL }, { NULL, NULL , }, };
+
+struct menu_data menu_sms[] = { { "1", "WCDMA", menu_sms_wcdma, NULL, NULL }, {
+		"2", "CDMA", menu_sms_cdma, NULL, NULL }, { NULL, NULL , }, };
+
+void register_sms_event (TapiHandle *handle)
+{
+	int ret;
+
+	/* SMS */
+	ret = tel_register_noti_event (handle, TAPI_NOTI_SMS_INCOM_MSG,
+			on_noti_sms_incom_msg, NULL );
+	if (ret != TAPI_API_SUCCESS) {
+		msg("event register failed(%d)", ret);
+	}
+
+	ret = tel_register_noti_event (handle, TAPI_NOTI_SMS_CB_INCOM_MSG,
+			on_noti_sms_cb_incom_msg, NULL );
+	if (ret != TAPI_API_SUCCESS) {
+		msg("event register failed(%d)", ret);
+	}
+
+	ret = tel_register_noti_event (handle, TAPI_NOTI_SMS_ETWS_INCOM_MSG,
+			on_noti_sms_etws_incom_msg, NULL );
+	if (ret != TAPI_API_SUCCESS) {
+		msg("event register failed(%d)", ret);
+	}
+
+//        ret = tel_register_noti_event(handle, TAPI_NOTI_SMS_INCOM_EX_MSG, on_noti_sms_incom_ex_msg, NULL);
+//        ret = tel_register_noti_event(handle, TAPI_NOTI_SMS_CB_INCOM_EX_MSG, on_noti_sms_cb_incom_ex_msg, NULL);
+
+	ret = tel_register_noti_event (handle, TAPI_NOTI_SMS_MEMORY_STATUS,
+			on_noti_sms_memory_status, NULL );
+	if (ret != TAPI_API_SUCCESS) {
+		msg("event register failed(%d)", ret);
+	}
+
+	ret = tel_register_noti_event (handle, TAPI_NOTI_SMS_DEVICE_READY,
+			on_noti_sms_ready_status, NULL );
+	if (ret != TAPI_API_SUCCESS) {
+		msg("event register failed(%d)", ret);
+	}
+}

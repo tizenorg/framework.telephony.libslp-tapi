@@ -15,9 +15,11 @@ FOREACH(flag ${pkgs_CFLAGS})
 ENDFOREACH(flag)
 
 SET(EXTRA_CFLAGS "${EXTRA_CFLAGS}  -Wl,-zdefs -fvisibility=hidden ")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS} -Werror -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-declarations -Wredundant-decls -Wcast-align")
+
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS} -Werror -Wextra -Wno-missing-field-initializers -Wdeclaration-after-statement -Wmissing-declarations -Wredundant-decls -O2 -Wall -Wno-array-bounds -Wno-empty-body -Wno-ignored-qualifiers -Wno-unused-parameter -Wwrite-strings -Wswitch-default -Wno-unused-but-set-variable ")
+
 #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
-SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src)
 
@@ -41,7 +43,7 @@ SET(SRCS
 		src/tapi_sms.c
 		src/tapi_sat.c
 		src/tapi_modem.c
-   )
+)
 
 ADD_LIBRARY(SLP-tapi SHARED ${SRCS})
 TARGET_LINK_LIBRARIES(SLP-tapi ${pkgs_LDFLAGS})
@@ -54,3 +56,7 @@ CONFIGURE_FILE(tapi.pc.in tapi.pc @ONLY)
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include/telephony-client)
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tapi.pc DESTINATION lib/pkgconfig)
 INSTALL(TARGETS SLP-tapi DESTINATION lib COMPONENT Runtime)
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION /usr/share/license RENAME libslp-tapi)
+IF (TIZEN_ENGINEER_MODE)
+	ADD_SUBDIRECTORY(test_src)
+ENDIF (TIZEN_ENGINEER_MODE)

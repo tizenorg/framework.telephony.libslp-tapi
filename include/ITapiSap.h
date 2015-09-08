@@ -1,7 +1,7 @@
 /*
  * libslp-tapi
  *
- * Copyright (c) 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2014 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Contact: Ja-young Gu <jygu@samsung.com>
  *
@@ -19,25 +19,20 @@
  */
 
 /**
-* @open
-* @ingroup		TelephonyAPI
-* @addtogroup	SAP_TAPI	SAP
-* @{
-*
-* @file ITapiSap.h
+ * @file ITapiSap.h
+ */
 
-     @brief This file serves as a "C" header file defines functions for Tapi SAP Services.\n
-      It contains a sample set of function prototypes that would be required by applications.
-
-*/
+/**
+ * @internal
+ * @addtogroup CAPI_TELEPHONY_SERVICE_SAP
+ * @{
+ */
 
 #ifndef _ITAPI_SAP_H_
 #define _ITAPI_SAP_H_
 
 #include <tapi_common.h>
-#include <TelErr.h>
 #include <TelSim.h>
-#include <TelDefines.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -45,381 +40,175 @@ extern "C"
 #endif
 
 /**
- * @brief  This API is used to request to connect sap.
+ * @brief Requests to connect SAP.
  *
- * @par Sync (or) Async:
- * This is an Asynchronous API.
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API.\n
  *
- * @par Important Notes:
- * - None
+ *          <b> Prospective Clients: </b> External Apps.
  *
- * @warning
- * - None.
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @param[in] handle The handle from tel_init()
+ * @param[in] max_msg_size The maximum message size
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param[in] max_msg_size
- *
- * @param [in] callback
- * - To register callback function for result.
- *
- * @param [in] user_data
- * - user_data for user specification.
- *
- * @par
- *
- * @pre
- *
- * @post
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
- * @see None
- *
- * @code
- *
- * @endcode
- *
- * @remarks None
- *
+ * @return The return type (int) \n
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation has completed successfully \n
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
-/*================================================================================================*/
 int tel_req_sap_connect(TapiHandle *handle, int max_msg_size, tapi_response_cb callback, void *user_data);
 
 /**
- * @brief  This API is used to request sap to disconnect sap.
+ * @brief Requests to disconnect SAP.
  *
- * @par Sync (or) Async:
- * This is an Asynchronous API.
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API.\n
  *
- * @par Important Notes:
- * - None
+ *          <b> Prospective Clients: </b> External Apps.
  *
- * @warning
- * - None.
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @param[in] handle The handle from tel_init()
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param [in] callback
- * - To register callback function for result.
- *
- * @param [in] user_data
- * - user_data for user specification.
- *
- * @par
- *
- * @pre
- *
- * @post
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
- * @see None
- *
- * @code
- *
- * @endcode
- *
- * @remarks None
- *
+ * @return The return type (int) \n
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation has completed successfully \n
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
-/*================================================================================================*/
 int tel_req_sap_disconnect(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
 /**
- * @brief  This API is used to request sap connection status.
+ * @brief Requests for the SAP connection status.
  *
- * @par Sync (or) Async:
- * This is an Asynchronous API.
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API.\n
  *
- * @par Important Notes:
- * - None
+ *          <b> Prospective Clients: </b> External Apps.
  *
- * @warning
- * - None.
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @param[in] handle The handle from tel_init()
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param [in] callback
- * - To register callback function for result.
- *
- * @param [in] user_data
- * - user_data for user specification.
- *
- * @par
- *
- * @pre
- *
- * @post
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
- * @see None
- *
- * @code
- *
- * @endcode
- *
- * @remarks None
- *
+ * @return The return type (int) \n 
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation has completed successfully \n 
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
-/*================================================================================================*/
 int tel_req_sap_connection_status(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
 /**
- * @brief  This API is used to request to get atr.
+ * @brief Requests to get atr.
  *
- * @par Sync (or) Async:
- * This is an Asynchronous API.
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API.\n
  *
- * @par Important Notes:
- * - None
+ *          <b> Prospective Clients: </b> External Apps.
  *
- * @warning
- * - None.
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @param[in] handle The handle from tel_init()
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param [in] callback
- * - To register callback function for result.
- *
- * @param [in] user_data
- * - user_data for user specification.
- *
- * @par
- *
- * @pre
- *
- * @post
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
- * @see None
- *
- * @code
- *
- * @endcode
- *
- * @remarks None
- *
+ * @return The return type (int) \n 
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation has completed successfully \n 
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
-/*================================================================================================*/
 int tel_req_sap_transfer_atr(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
 /**
- * @brief  This API is used to request to transfer apdu.
+ * @brief Requests to transfer APDU.
  *
- * @par Sync (or) Async:
- * This is an Asynchronous API.
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API.\n
  *
- * @par Important Notes:
- * - None
+ *          <b> Prospective Clients: </b> External Apps.
  *
- * @warning
- * - None.
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @param[in] handle The handle from tel_init()
+ * @param[in] apdu_data The APDU data
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param [in] apdu_data
- *
- * @param [in] callback
- * - To register callback function for result.
- *
- * @param [in] user_data
- * - user_data for user specification.
- *
- * @par
- *
- * @pre
- *
- * @post
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
- * @see None
- *
- * @code
- *
- * @endcode
- *
- * @remarks None
- *
+ * @return The return type (int) \n 
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation has completed successfully \n 
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
-/*================================================================================================*/
 int tel_req_sap_transfer_apdu(TapiHandle *handle, TelSapApduData_t *apdu_data, tapi_response_cb callback, void *user_data);
 
 /**
- * @brief  This API is used to request to transport protocol.
+ * @brief Requests to transport protocol.
  *
- * @par Sync (or) Async:
- * This is an Asynchronous API.
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API.\n
  *
- * @par Important Notes:
- * - None
+ *          <b> Prospective Clients: </b> External Apps.
  *
- * @warning
- * - None.
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @param[in] handle The handle from tel_init()
+ * @param[in] protocol The SAP transport protocol type
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param [in] protocol
- * - SAP transport protocol type
- *
- * @param [in] callback
- * - To register callback function for result.
- *
- * @param [in] user_data
- * - user_data for user specification.
- *
- * @par
- *
- * @pre
- *
- * @post
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
- * @see None
- *
- * @code
- *
- * @endcode
- *
- * @remarks None
- *
+ * @return The return type (int)\n 
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation has completed successfully\n
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
-/*================================================================================================*/
 int tel_req_sap_transport_protocol(TapiHandle *handle, TelSimSapProtocol_t protocol, tapi_response_cb callback, void *user_data);
 
 /**
- * @brief  This API is used to request to control power_mode.
+ * @brief Requests to control power mode.
  *
- * @par Sync (or) Async:
- * This is an Asynchronous API.
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API.\n
  *
- * @par Important Notes:
- * - None
+ *          <b> Prospective Clients: </b> External Apps.
  *
- * @warning
- * - None.
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @param[in] handle The handle from tel_init()
+ * @param[in] power_mode The data to control the power mode of client
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param [in] power_mode
- * - enum data for controlling power mode of client
- *
- * @param [in] callback
- * - To register callback function for result.
- *
- * @param [in] user_data
- * - user_data for user specification.
- *
- * @par
- *
- * @pre
- *
- * @post
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
- * @see None
- *
- * @code
- *
- * @endcode
- *
- * @remarks None
- *
+ * @return The return type (int) \n 
+ *         Integer '0' ( same with TAPI_API_SUCCESS ): indicates that the operation has completed successfully \n 
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
-/*================================================================================================*/
 int tel_req_sap_power_operation(TapiHandle *handle, TelSimSapPowerMode_t power_mode, tapi_response_cb callback, void *user_data);
 
 /**
- * @brief  This API is used to request to get card_reader_status.
+ * @brief Requests to get the card reader status.
  *
- * @par Sync (or) Async:
- * This is an Asynchronous API.
+ * @details <b> Sync (or) Async: </b> This is an Asynchronous API.\n
  *
- * @par Important Notes:
- * - None
+ *          <b> Prospective Clients: </b> External Apps.
  *
- * @warning
- * - None.
+ * @since_tizen 2.3
+ * @privlevel platform
+ * @privilege %http://tizen.org/privilege/telephony.admin
  *
- * @param [in] handle
- * - handle from tel_init().
+ * @param[in] handle The handle from tel_init()
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
  *
- * @param [in] callback
- * - To register callback function for result.
- *
- * @param [in] user_data
- * - user_data for user specification.
- *
- * @par
- *
- * @pre
- *
- * @post
- *
- * @return Return Type (int) \n
- * - Integer '0' ( same with TAPI_API_SUCCESS )  - indicating that the operation has completed successfully. \n
- * - Negative integer : it provides an error code (Refer #TapiResult_t)
- *
- * @par Prospective Clients:
- * External Apps.
- *
- * @see None
- *
- * @code
- *
- * @endcode
- *
- * @remarks None
- *
+ * @return The return type (int) \n 
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation has completed successfully \n
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
  */
-/*================================================================================================*/
 int tel_req_sap_cardreader_status(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
 #ifdef __cplusplus
@@ -429,5 +218,5 @@ int tel_req_sap_cardreader_status(TapiHandle *handle, tapi_response_cb callback,
 #endif	/* _ITAPI_SAP_H_ */
 
 /**
-* @}
-*/
+ * @}
+ */

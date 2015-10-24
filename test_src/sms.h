@@ -21,15 +21,6 @@
 #ifndef TAPI_SMS_CDMA_H
 #define TAPI_SMS_CDMA_H
 
-/*
-   typedef unsigned char	INT8;
-   typedef unsigned short	INT16;
-   typedef unsigned int	INT;
-   typedef unsigned long	INT32;
-
-   typedef unsigned char	BYTE;
-   */
-
 typedef int BOOL;
 
 #ifndef packed__

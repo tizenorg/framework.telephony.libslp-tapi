@@ -26,7 +26,6 @@
  */
 
 /**
- * @internal
  * @addtogroup CAPI_TELEPHONY_SERVICE
  * @{
  */
@@ -67,6 +66,13 @@ typedef void (*tapi_notification_cb)(TapiHandle *handle, const char *noti_id, vo
  * @param[in] user_data The user data
  */
 typedef void (*tapi_response_cb)(TapiHandle *handle, int result, void *data, void *user_data);
+
+/**
+ * @brief Called for the TAPI ready state.
+ * @param[in] state The TAPI ready state
+ * @param[in] user_data The user data
+ */
+typedef void (*tapi_state_cb)(int state, void *user_data);
 
 #ifdef __cplusplus
 }

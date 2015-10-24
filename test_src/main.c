@@ -38,6 +38,7 @@
 #include "modem.h"
 #include "call.h"
 #include "ss.h"
+#include "oem.h"
 
 #define SIM_SEL_MENU_KEY_COUNT 2
 
@@ -49,6 +50,7 @@ extern struct menu_data menu_sim[];
 extern struct menu_data menu_phonebook[];
 extern struct menu_data menu_ss[];
 extern struct menu_data menu_call[];
+extern struct menu_data menu_oem[];
 
 TapiHandle *handle = NULL;
 char **cp_list = NULL;
@@ -65,7 +67,7 @@ static int get_modem_info(MManager *mm, struct menu_data *menu)
 	int i = 0;
 
 	while (cp_list[i]) {
-		msg("[%02d] strlen(%d), '%s'", i, strlen(cp_list[i]), cp_list[i]);
+		msg("[%02d] strlen(%d), '%s'", i, (unsigned int)strlen(cp_list[i]), cp_list[i]);
 		i++;
 	}
 
@@ -117,9 +119,8 @@ static int get_property_int(MManager *mm, struct menu_data *menu)
 	msg("call tel_get_property_int()");
 
 	ret = tel_get_property_int(local_handle, data_property_int, &result_int);
-	if (ret != TAPI_API_SUCCESS) {
+	if (ret != TAPI_API_SUCCESS)
 		msg("failed. (return = %d)", ret);
-	}
 
 	msg(" - result = %d", result_int);
 
@@ -134,15 +135,14 @@ static int get_property_string(MManager *mm, struct menu_data *menu)
 
 	msg("call tel_get_property_string()");
 
-	ret = tel_get_property_string (local_handle, data_property_string, &result_str);
-	if (ret != TAPI_API_SUCCESS) {
+	ret = tel_get_property_string(local_handle, data_property_string, &result_str);
+	if (ret != TAPI_API_SUCCESS)
 		msg("failed. (return = %d)", ret);
-	}
 
 	msg(" - result = %s", result_str);
 
 	if (result_str)
-		free (result_str);
+		free(result_str);
 
 	return 0;
 }
@@ -155,23 +155,46 @@ static int convert_string(MManager *mm, struct menu_data *menu)
 
 	msg("call tel_get_property_string()");
 
-	ret = tel_get_property_string (local_handle, data_property_string, &result_str);
-	if (ret != TAPI_API_SUCCESS) {
+	ret = tel_get_property_string(local_handle, data_property_string, &result_str);
+	if (ret != TAPI_API_SUCCESS)
 		msg("failed. (return = %d)", ret);
-	}
 
 	msg(" - result = %s", result_str);
 
 	if (result_str)
-		free (result_str);
+		free(result_str);
 
 	return 0;
+}
+
+static int get_ready_state(MManager *mm, struct menu_data *menu)
+{
+	int value = 0;
+	int ret;
+
+	msg("call tel_get_ready_state()");
+
+	ret = tel_get_ready_state(&value);
+	if (ret != TAPI_API_SUCCESS)
+		msg("failed. (return = %d)", ret);
+
+	msg(" - result = %s", (value) ? "TRUE" : "FALSE");
+
+	return 0;
+}
+
+static void on_ready_state(int state, void *user_data)
+{
+	msg("");
+	msgb("ready state receive !!");
+
+	msg("state = %s", (state) ? "TRUE" : "FALSE");
 }
 
 static struct menu_data menu_common[] = {
 	{ "1", "tel_get_modem_info", NULL, get_modem_info, NULL},
 	{ "2", "tel_init", NULL, init, NULL},
-	{ "3", "tel_deinit", NULL,	deinit, NULL},
+	{ "3", "tel_deinit", NULL, deinit, NULL},
 	{ "4", "tel_get_property_int",	NULL, get_property_int, NULL},
 	{ "4s", " - property", NULL, NULL, data_property_int},
 	{ "5", "tel_get_property_string", NULL, get_property_string, NULL},
@@ -179,23 +202,25 @@ static struct menu_data menu_common[] = {
 	{ "6", "tcore_util_convert_string_to_utf8", NULL, convert_string, NULL},
 	{ "6d", " - dcs", NULL, NULL, data_convert_dcs},
 	{ "6s", " - string", NULL, NULL, data_convert_string},
+	{ "7", "tel_get_ready_state", NULL, get_ready_state, NULL},
 	{ NULL, NULL, },
 };
 
 static struct menu_data menu_main[] = {
-	{ "1", "Common",	menu_common,NULL,		NULL},
-	{ "2", "Modem",		menu_modem,	NULL,		NULL},
-	{ "3", "Network",	menu_net,	NULL,		NULL},
-	{ "4", "SIM",		menu_sim,	NULL,		NULL},
-	{ "5", "Phonebook",	menu_phonebook,	NULL,	NULL},
-	{ "6", "SMS",		menu_sms,	NULL,		NULL},
-	{ "7", "SS",		menu_ss,	NULL,		NULL},
-	{ "8", "SAT",		menu_sat,	NULL,		NULL},
-	{ "9", "Call",		menu_call,	NULL,		NULL},
+	{ "1", "Common", menu_common, NULL, NULL},
+	{ "2", "Modem", menu_modem, NULL, NULL},
+	{ "3", "Network", menu_net, NULL, NULL},
+	{ "4", "SIM", menu_sim, NULL, NULL},
+	{ "5", "Phonebook", menu_phonebook, NULL,	NULL},
+	{ "6", "SMS", menu_sms, NULL, NULL},
+	{ "7", "SS", menu_ss, NULL, NULL},
+	{ "8", "SAT", menu_sat, NULL, NULL},
+	{ "9", "Call", menu_call, NULL, NULL},
+	{ "a", "Oem", menu_oem, NULL, NULL},
 	{ NULL, NULL, },
 };
 
-static int __select_handle_register_event (MManager *mm, struct menu_data *menu)
+static int __select_handle_register_event(MManager *mm, struct menu_data *menu)
 {
 	int subs_type = atoi(data_subscription_type);
 
@@ -230,6 +255,9 @@ static int __select_handle_register_event (MManager *mm, struct menu_data *menu)
 	register_sms_event(handle);
 	register_call_event(handle);
 	register_ss_event(handle);
+	register_oem_event(handle);
+
+	tel_register_ready_state_cb(on_ready_state, NULL);
 
 	return RET_SUCCESS;
 }
@@ -270,10 +298,9 @@ static gboolean __create_sim_selection_menu(struct menu_data sim_selection_menu[
 	sim_selection_menu[0].title = (char *)g_try_malloc0(title_len);
 	index_count += snprintf((char *)&sim_selection_menu[0].title[index_count], title_len, "Modems(");
 
-	i=0;
+	i = 0;
 	while (cp_list[i]) {
 		if (i != 0)
-//			sim_selection_menu[0].title[index_count++] = ',';
 			strncat((char *)&sim_selection_menu[0].title[index_count++], ",", sizeof(char));
 
 		index_count += snprintf((char *)&sim_selection_menu[0].title[index_count],
@@ -285,6 +312,7 @@ static gboolean __create_sim_selection_menu(struct menu_data sim_selection_menu[
 
 	if (index_count <= title_len - 2) {
 		strncat((char *)&sim_selection_menu[0].title[index_count++], ")", sizeof(char));
+		strncat((char *)&sim_selection_menu[0].title[index_count], "\0", sizeof(char));
 	} else {
 		msg("Invalid count");
 		return FALSE;
@@ -306,12 +334,14 @@ static gboolean __create_sim_selection_menu(struct menu_data sim_selection_menu[
 
 int main(int arg, char **argv)
 {
-	GMainLoop *mainloop;
+	GMainLoop *mainloop = NULL;
 	GIOChannel *channel = g_io_channel_unix_new(STDIN_FILENO);
 	MManager *manager;
 	struct menu_data sim_selection_menu[SIM_SEL_MENU_KEY_COUNT+1] = { {NULL, NULL, }, };
 
+#if !GLIB_CHECK_VERSION(2, 35, 0)
 	g_type_init();
+#endif
 	mainloop = g_main_loop_new(NULL, FALSE);
 
 	msg("");

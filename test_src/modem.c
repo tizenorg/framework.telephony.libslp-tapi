@@ -48,6 +48,30 @@ static void on_noti_modem_power(TapiHandle *handle, const char *noti_id, void *d
 	msg(" - status = 0x%x", *status);
 }
 
+static void on_prop_dongle_status(TapiHandle *handle, const char *noti_id, void *data, void *user_data)
+{
+	int *status = data;
+
+	msg("");
+	msgp("property(%s) receive !!", TAPI_PROP_MODEM_DONGLE_STATUS);
+
+	if (!status)
+		return;
+	msg("status = 0x%x", *status);
+}
+
+static void on_prop_dongle_login(TapiHandle *handle, const char *noti_id, void *data, void *user_data)
+{
+	int *status = data;
+
+	msg("");
+	msgp("property(%s) receive !!", TAPI_PROP_MODEM_DONGLE_LOGIN);
+
+	if (!status)
+		return;
+	msg("status = 0x%x", *status);
+}
+
 static void on_modem_get_version(TapiHandle *handle, int result, void *data, void *user_data)
 {
 	TelMiscVersionInformation *info = data;
@@ -64,6 +88,8 @@ static void on_modem_get_version(TapiHandle *handle, int result, void *data, voi
 	msg(" - RfCal Date = %s", info->szRfCalDate);
 	msg(" - Product Code = %s", info->szProductCode);
 	msg(" - Model ID = %s", info->szModelId);
+	msg(" - Prl Version = %s", info->szPrlVersion);
+	msg(" - ERI Version = %s", info->szEriVersion);
 }
 
 static void on_modem_get_serial_number(TapiHandle *handle, int result, void *data, void *user_data)
@@ -79,6 +105,8 @@ static void on_modem_get_serial_number(TapiHandle *handle, int result, void *dat
 
 	msg(" - esn number = %s", sn->szEsn);
 	msg(" - meid number = %s", sn->szMeid);
+	msg(" - imei number = %s", sn->szImei);
+	msg(" - imeisv number = %s", sn->szImeiSv);
 
 }
 
@@ -112,7 +140,7 @@ static void on_modem_set_flight_mode(TapiHandle *handle, int result, void *data,
 {
 	msg("");
 	msgb("tel_set_flight_mode() response receive");
-	msg(" - result = %s", (result == 1) ? "ON" : (result == 2) ? "OFF" : "FAIL" );
+	msg(" - result = 0x%x", result);
 }
 
 static void on_modem_set_power(TapiHandle *handle, int result, void *data, void *user_data)
@@ -120,6 +148,33 @@ static void on_modem_set_power(TapiHandle *handle, int result, void *data, void 
 	msg("");
 	msgb("tel_process_power_command() response receive");
 	msg(" - result = 0x%x", result);
+}
+
+static void on_modem_get_device_info(TapiHandle *handle, int result, void *data, void *user_data)
+{
+	TelMiscDeviceInfo_t *device_info = data;
+
+	msg("");
+	msgb("tel_get_device_info() response receive");
+	msg(" - result = 0x%x", result);
+	if (result == TAPI_API_SUCCESS) {
+		msg("Vendor: [%s] / Device: [%s]",
+			device_info->vendor_name, device_info->device_name);
+	}
+}
+
+static int run_modem_get_device_info(MManager *mm, struct menu_data *menu)
+{
+	TapiHandle *handle = menu_manager_ref_user_data(mm);
+	int result;
+
+	msg("call tel_get_device_info()");
+
+	result = tel_get_device_info(handle, on_modem_get_device_info, NULL);
+	if (result != TAPI_API_SUCCESS)
+		msg("failed. (result = %d)", result);
+
+	return 0;
 }
 
 static int run_modem_get_version(MManager *mm, struct menu_data *menu)
@@ -130,9 +185,8 @@ static int run_modem_get_version(MManager *mm, struct menu_data *menu)
 	msg("call tel_get_misc_me_version()");
 
 	result = tel_get_misc_me_version(handle, on_modem_get_version, NULL);
-	if (result != TAPI_API_SUCCESS) {
+	if (result != TAPI_API_SUCCESS)
 		msg("failed. (result = %d)", result);
-	}
 
 	return 0;
 }
@@ -155,6 +209,8 @@ static int run_modem_get_version_sync(MManager *mm, struct menu_data *menu)
 	msg(" - RfCal Date = %s", info->szRfCalDate);
 	msg(" - Product Code = %s", info->szProductCode);
 	msg(" - Model ID = %s", info->szModelId);
+	msg(" - Prl Version = %s", info->szPrlVersion);
+	msg(" - ERI Version = %s", info->szEriVersion);
 
 	free(info);
 
@@ -169,9 +225,8 @@ static int run_modem_get_serial_number(MManager *mm, struct menu_data *menu)
 	msg("call tel_get_misc_me_sn()");
 
 	result = tel_get_misc_me_sn(handle, on_modem_get_serial_number, NULL);
-	if (result != TAPI_API_SUCCESS) {
+	if (result != TAPI_API_SUCCESS)
 		msg("failed. (result = %d)", result);
-	}
 
 	return 0;
 }
@@ -191,6 +246,8 @@ static int run_modem_get_serial_number_sync(MManager *mm, struct menu_data *menu
 
 	msg(" - esn number = [%s]", sn->szEsn);
 	msg(" - meid number = [%s]", sn->szMeid);
+	msg(" - imei number = [%s]", sn->szImei);
+	msg(" - imeisv number = [%s]", sn->szImeiSv);
 
 	free(sn);
 
@@ -205,9 +262,8 @@ static int run_modem_get_imei(MManager *mm, struct menu_data *menu)
 	msg("call tel_get_misc_me_imei()");
 
 	result = tel_get_misc_me_imei(handle, on_modem_get_imei, NULL);
-	if (result != TAPI_API_SUCCESS) {
+	if (result != TAPI_API_SUCCESS)
 		msg("failed. (result = %d)", result);
-	}
 
 	return 0;
 }
@@ -243,9 +299,8 @@ static int run_modem_set_power(MManager *mm, struct menu_data *menu)
 	mode = atoi(data_modem_set_power_mode);
 
 	result = tel_process_power_command(handle, mode, on_modem_set_power, NULL);
-	if (result != TAPI_API_SUCCESS) {
+	if (result != TAPI_API_SUCCESS)
 		msg("failed. (result = %d)", result);
-	}
 
 	return 0;
 }
@@ -261,9 +316,8 @@ static int run_modem_set_flight_mode(MManager *mm, struct menu_data *menu)
 	mode = atoi(data_modem_set_flight_mode_mode);
 
 	result = tel_set_flight_mode(handle, mode, on_modem_set_flight_mode, NULL);
-	if (result != TAPI_API_SUCCESS) {
+	if (result != TAPI_API_SUCCESS)
 		msg("failed. (result = %d)", result);
-	}
 
 	return 0;
 }
@@ -276,9 +330,8 @@ static int run_modem_get_flight_mode(MManager *mm, struct menu_data *menu)
 	msg("call tel_get_flight_mode()");
 
 	result = tel_get_flight_mode(handle, on_modem_get_flight_mode, NULL);
-	if (result != TAPI_API_SUCCESS) {
+	if (result != TAPI_API_SUCCESS)
 		msg("failed. (result = %d)", result);
-	}
 
 	return 0;
 }
@@ -355,6 +408,12 @@ static struct menu_data menu_modem_check_power[] = {
 	{ NULL, NULL, },
 };
 
+static struct menu_data menu_modem_get_device_info[] = {
+	{ "1", "run", NULL, run_modem_get_device_info, NULL},
+	{ NULL, NULL, },
+};
+
+
 struct menu_data menu_modem[] = {
 	{ "1", "tel_get_misc_me_version", menu_modem_get_version, NULL, NULL},
 	{ "1s", "tel_get_misc_me_version_sync", menu_modem_get_version_sync, NULL, NULL},
@@ -366,6 +425,7 @@ struct menu_data menu_modem[] = {
 	{ "4s", "tel_set_flight_mode", menu_modem_set_flight_mode, NULL, NULL},
 	{ "5", "tel_process_power_command", menu_modem_set_power, NULL, NULL},
 	{ "6", "tel_check_modem_power_status", menu_modem_check_power, NULL, NULL},
+	{ "7", "tel_get_device_info", menu_modem_get_device_info, NULL, NULL},
 	{ NULL, NULL, },
 };
 
@@ -374,7 +434,14 @@ void register_modem_event(TapiHandle *handle)
 	int ret;
 
 	ret = tel_register_noti_event(handle, TAPI_NOTI_MODEM_POWER, on_noti_modem_power, NULL);
-	if (ret != TAPI_API_SUCCESS) {
+	if (ret != TAPI_API_SUCCESS)
 		msg("event register failed(%d)", ret);
-	}
+
+	ret = tel_register_noti_event(handle, TAPI_PROP_MODEM_DONGLE_STATUS, on_prop_dongle_status, NULL);
+	if (ret != TAPI_API_SUCCESS)
+		msg("event register failed(%d)", ret);
+
+	ret = tel_register_noti_event(handle, TAPI_PROP_MODEM_DONGLE_LOGIN, on_prop_dongle_login, NULL);
+	if (ret != TAPI_API_SUCCESS)
+		msg("event register failed(%d)", ret);
 }

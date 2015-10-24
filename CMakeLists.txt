@@ -8,7 +8,7 @@ SET(INCLUDEDIR "\${prefix}/include")
 
 # Set required packages
 INCLUDE(FindPkgConfig)
-pkg_check_modules(pkgs REQUIRED glib-2.0 gio-2.0 gthread-2.0 dlog security-server)
+pkg_check_modules(pkgs REQUIRED glib-2.0 gio-2.0 gthread-2.0 dlog security-server vconf)
 
 FOREACH(flag ${pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
@@ -16,7 +16,7 @@ ENDFOREACH(flag)
 
 SET(EXTRA_CFLAGS "${EXTRA_CFLAGS}  -Wl,-zdefs -fvisibility=hidden ")
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS} -Werror -Wextra -Wno-missing-field-initializers -Wdeclaration-after-statement -Wmissing-declarations -Wredundant-decls -O2 -Wall -Wno-array-bounds -Wno-empty-body -Wno-ignored-qualifiers -Wno-unused-parameter -Wwrite-strings -Wswitch-default -Wno-unused-but-set-variable ")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS} -Werror -Wextra -Wno-missing-field-initializers -Wmissing-declarations -Wredundant-decls -O2 -Wall -Wno-array-bounds -Wno-empty-body -Wno-ignored-qualifiers -Wno-unused-parameter -Wwrite-strings -Wswitch-default -Wno-unused-but-set-variable ")
 
 #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
@@ -33,16 +33,17 @@ MESSAGE(${CMAKE_EXE_LINKER_FLAGS})
 
 ### Build ###
 SET(SRCS
-		src/tapi_common.c
-		src/tapi_network.c
-		src/tapi_sim.c
-		src/tapi_phonebook.c
-		src/tapi_sap.c
-		src/tapi_call.c
-		src/tapi_ss.c
-		src/tapi_sms.c
-		src/tapi_sat.c
-		src/tapi_modem.c
+	src/tapi_common.c
+	src/tapi_network.c
+	src/tapi_sim.c
+	src/tapi_phonebook.c
+	src/tapi_sap.c
+	src/tapi_call.c
+	src/tapi_ss.c
+	src/tapi_sms.c
+	src/tapi_sat.c
+	src/tapi_modem.c
+	src/tapi_oem.c
 )
 
 ADD_LIBRARY(SLP-tapi SHARED ${SRCS})

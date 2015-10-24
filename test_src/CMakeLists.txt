@@ -9,10 +9,12 @@ SET(tapitest
 	sim.c
 	sms.c
 	sms_util.c
+	sms_util_cdma.c
 	phonebook.c
 	modem.c
 	ss.c
 	call.c
+	oem.c
 )
 
 ##Address-Space Layout Randomization

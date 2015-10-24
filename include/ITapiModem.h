@@ -23,7 +23,6 @@
  */
 
 /**
- * @internal
  * @addtogroup CAPI_TELEPHONY_SERVICE_MODEM
  * @{
  */
@@ -57,6 +56,7 @@ extern "C" {
  * @return The return type (int) \n
  *         #TAPI_API_SUCCESS indicates that the operation is completed successfully,
  *         else it provides an error code (Refer #TapiResult_t).
+ * @post callback will be invoked and data is NULL.
  */
 int tel_process_power_command(TapiHandle *handle, tapi_power_phone_cmd_t cmd, tapi_response_cb callback, void *user_data);
 
@@ -80,6 +80,7 @@ int tel_process_power_command(TapiHandle *handle, tapi_power_phone_cmd_t cmd, ta
  * @return The return type (int) \n
  *         #TAPI_API_SUCCESS indicates that the operation is completed successfully, \n
  *         else it provides an error code (Refer #TapiResult_t).
+ * @post callback will be invoked and #tapi_power_flight_mode_resp_type_t will be stored in result and data is NULL.
  */
 int tel_set_flight_mode(TapiHandle *handle, tapi_power_flight_mode_type_t mode, tapi_response_cb callback, void *user_data);
 
@@ -93,6 +94,8 @@ int tel_set_flight_mode(TapiHandle *handle, tapi_power_flight_mode_type_t mode, 
  * @param[in] handle The handle from tel_init()
  * @param[in] callback To register a callback function for result
  * @param[in] user_data The user data for user specification
+ *
+ * @post callback will be invoked and 1(ON) or 0(OFF) will be stored in data on success case.
  */
 int tel_get_flight_mode(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
@@ -114,6 +117,7 @@ int tel_get_flight_mode(TapiHandle *handle, tapi_response_cb callback, void *use
  * @return The return type (int) \n
  *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation is completed successfully \n
  *         Negative integer : It provides an error code (Refer #TapiResult_t).
+ * @post callback will be invoked and #TelMiscVersionInformation will be stored in data on success case.
  */
 int tel_get_misc_me_version(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
@@ -153,6 +157,7 @@ TelMiscVersionInformation *tel_get_misc_me_version_sync(TapiHandle *handle);
  * @return The return type (int) \n
  *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation is completed successfully \n
  *         Negative integer : It provides an error code (Refer #TapiResult_t).
+ * @post callback will be invoked and #TelMiscSNInformation will be stored in data on success case.
  */
 int tel_get_misc_me_sn(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
@@ -196,6 +201,7 @@ TelMiscSNInformation *tel_get_misc_me_sn_sync(TapiHandle *handle);
  * @return The return type (int) \n
  *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation is completed successfully \n
  *         Negative integer : It provides an error code (Refer #TapiResult_t).
+ * @post callback will be invoked and IMEI value(char *) will be stored in data on success case.
  */
 int tel_get_misc_me_imei(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
@@ -242,8 +248,34 @@ char *tel_get_misc_me_imei_sync(TapiHandle *handle);
  * @return The return type (int) \n
  *         @c 0 indicates that the operation is completed successfully, \n
  *         else it will return failure and an error code (Refer Doxygen doc or #TapiResult_t).
+ * @post #tapi_power_phone_power_status_t will be stored in result.
  */
 int tel_check_modem_power_status(TapiHandle *handle, int *result);
+
+/**
+ * @brief Gets device vendor name and device name of cellular dongle.
+ *
+ * @details This function provides vendor and device name of cellular dongle.
+ *          Result can be delivered with only cellular dongle insertion.
+ *
+ * <b> Sync (or) Async: </b> This is an Asynchronous API.\n
+ *
+ * <b> Prospective Clients: </b> External Apps.
+ *
+ * @since_tizen 2.4
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/telephony
+ *
+ * @param[in] handle The handle from tel_init()
+ * @param[in] callback To register a callback function for result
+ * @param[in] user_data The user data for user specification
+ *
+ * @return The return type (int) \n
+ *         Integer '0' ( same with #TAPI_API_SUCCESS ): indicates that the operation is completed successfully. \n
+ *         Negative integer : It provides an error code (Refer #TapiResult_t).
+ * @post callback will be invoked and #TelMiscDeviceInfo_t will be stored in data on success case.
+ */
+int tel_get_device_info(TapiHandle *handle, tapi_response_cb callback, void *user_data);
 
 #ifdef __cplusplus
 }

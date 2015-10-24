@@ -41,7 +41,7 @@
 #define SMS_CB_PAGE_SIZE_MAX				9		/**< CB maximum page size*/
 #define SMS_GSM_SMS_MSG_NUM_MAX			255		/**< Maximum GSM SMS message number*/
 #define SMS_GSM_SMS_CBMI_LIST_SIZE_MAX		50		/**< Maximum GSM SMS CBMI list size*/
-#define SMS_SMDATA_SIZE_MAX					165		/**< Maximum SMS data size that can be stored*/
+#define SMS_SMDATA_SIZE_MAX					255		/**< Maximum SMS data size that can be stored*/
 #define SMS_MAX_SMS_SERVICE_CENTER_ADDR		12		/**<Maximum SMS service center address*/
 #define SMS_MAX_INDEX						25		/**< Maximum index value for SMS */
 
@@ -126,7 +126,7 @@ typedef enum
 
 } sd_message_status;
 
-typedef enum 
+typedef enum
 {
 	SMS_TON_UNKNOWN = 0, /**< unknown */
 	SMS_TON_INTERNATIONAL=1, /**< international number */
@@ -138,7 +138,7 @@ typedef enum
 	SMS_TON_RESERVED_FOR_EXT = 7 /**< reserved for extension */
 } SimTypeOfNum_t;
 
-typedef enum 
+typedef enum
 {
 	SMS_NPI_UNKNOWN = 0, /**< Unknown */
 	SMS_NPI_ISDN_TEL = 1, /**< ISDN/Telephone numbering plan */
@@ -552,6 +552,11 @@ void SmsUtilEncodeDCS( unsigned char* pDCS, Sms_coding_scheme* pCodingScheme);
 
  unsigned char SmsUtilEncodeValidity( unsigned char* pValidity, Sms_vp* pVP );
 
-
-
+ void __util_hex_dump(const char *pad, int size, const void *data);
+ unsigned char __sms_hexchar_to_int(char ch);
+ gboolean __sms_asciistring_to_hex(const char *ascii_string,
+					unsigned char *hex_string,
+					int ascii_len);
+ void bitarray_copy(const unsigned char *src_org, int src_offset,
+ 				int src_len,  unsigned char *dst_org, unsigned int dst_offset);
 

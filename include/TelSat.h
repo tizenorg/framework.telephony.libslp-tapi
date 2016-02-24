@@ -52,7 +52,7 @@ extern "C"
  * @brief Definition for the maximum length of a menu item.
  * @since_tizen 2.3
  */
-#define TAPI_SAT_DEF_ITEM_STR_LEN_MAX		255
+#define TAPI_SAT_DEF_ITEM_STR_LEN_MAX		50
 
 /**
  * @brief Definition for the maximum length of a text string.

@@ -1009,8 +1009,8 @@ struct menu_data menu_net_3gpp[] = {
 	{ "9g", "GET Neighboring Cell Info", menu_net_get_neighboring_cell_info, NULL, NULL},
 	{ "10", "SET Default Data Subscription", menu_net_set_default_data_subscription, NULL, NULL},
 	{ "11", "GET Default Data Subscription", menu_net_get_default_data_subscription, NULL, NULL},
-	{ "12", "SET Default Subscription (for Voice)", menu_net_set_default_subscription, 0, 0},
-	{ "13", "GET Default Subscription (for Voice)", menu_net_get_default_subscription, 0, 0},
+	{ "12", "SET Default Subscription (for Voice)", menu_net_set_default_subscription, NULL, NULL},
+	{ "13", "GET Default Subscription (for Voice)", menu_net_get_default_subscription, NULL, NULL},
 	{ "*", "<Properties>", NULL, show_properties, NULL },
 	{ NULL, NULL, },
 };

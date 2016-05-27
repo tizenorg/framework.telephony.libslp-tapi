@@ -1,6 +1,6 @@
 %define major 0
 %define minor 8
-%define patchlevel 11
+%define patchlevel 13
 
 Name:           libslp-tapi
 Version:        %{major}.%{minor}.%{patchlevel}
